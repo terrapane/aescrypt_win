@@ -1,0 +1,9 @@
+; aescrypt.def : Declares the module name and exports
+
+LIBRARY "aescrypt.dll"
+
+EXPORTS
+    DllCanUnloadNow     PRIVATE
+    DllGetClassObject   PRIVATE
+    DllRegisterServer   PRIVATE
+    DllUnregisterServer PRIVATE
