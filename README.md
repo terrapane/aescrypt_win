@@ -18,7 +18,7 @@ For example, open via "x64 Native Tools Command Prompt for VS..." shortcut
 or run Visual Studio's `vcvars64.bat` batch file from a command prompt.
 
 From within the AES Crypt for Windows root source directory, type
-`build_dependencies` to configure, build, and locally (i.e., within the
+`build_dependencies` to configure, build, and locally install (i.e., within the
 source directory) the required dependencies.
 
 Building the rest of AES Crypt will require compiling using Visual Studio
