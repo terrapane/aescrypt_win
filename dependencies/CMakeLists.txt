@@ -10,15 +10,16 @@ endif()
 
 # Fetch the AES Crypt Engine
 FetchContent_Declare(aescrypt_engine
-    GIT_REPOSITORY  ${TERRAPANE_SOURCE_URI}/aescrypt_engine.git
-    GIT_TAG         master
-    GIT_SHALLOW     true)
+    GIT_REPOSITORY ${TERRAPANE_SOURCE_URI}/aescrypt_engine.git
+    GIT_TAG        v4.0.0
+    GIT_SHALLOW    true)
 
 # Fetch the AES Crypt CLI repository
 FetchContent_Declare(aescrypt_cli
-    GIT_REPOSITORY  ${TERRAPANE_SOURCE_URI}/aescrypt_cli.git
-    GIT_TAG         master
-    GIT_SHALLOW     true)
+    GIT_REPOSITORY ${TERRAPANE_SOURCE_URI}/aescrypt_cli.git
+    GIT_TAG        master
+    GIT_TAG        v4.0.0
+    GIT_SHALLOW    true)
 
 # Make dependencies available
 FetchContent_MakeAvailable(aescrypt_engine aescrypt_cli)
