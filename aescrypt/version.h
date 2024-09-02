@@ -19,5 +19,5 @@
 #pragma once
 
 #define Program_Name        "aescrypt (Windows GUI)"
-#define Program_Version     "4.0.0"
-#define Program_Date        "July 14, 2024"
+#define Program_Version     "4.0.1"
+#define Program_Date        "September 1, 2024"

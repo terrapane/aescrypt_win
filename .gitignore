@@ -10,7 +10,7 @@ aescrypt/dlldata.c
 aescrypt/aescrypt.vcxproj.user
 aescrypt32/x64/*
 aescrypt32/x32/*
-aescrypt/aescrypt32.aps
+aescrypt32/aescrypt32.aps
 aescrypt32/aescrypt32.vcxproj.user
 aescrypt_ps/x64/*
 aescrypt_ps/x32/*
