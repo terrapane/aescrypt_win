@@ -16,6 +16,7 @@
  *      Windows specific code.
  */
 
+#include <algorithm>
 #include "pch.h"
 #include "password_dialog.h"
 #include "secure_containers.h"
@@ -121,18 +122,8 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
     // Position the dialog
     CenterWindow(GetForegroundWindow());
 
-    // Limit the length of text in the password boxes to
-    // Max_Passwd_Length characters
-    SendDlgItemMessage(IDC_PASSWD, EM_SETLIMITTEXT, Max_Password_Length, 0);
-
-    if (encrypting)
-    {
-        SendDlgItemMessage(IDC_PASSWDCONFIRM,
-                           EM_SETLIMITTEXT,
-                           Max_Password_Length,
-                           0);
-    }
-    else
+    // If not encrypting, hide the password confirmation controls
+    if (encrypting == false)
     {
         // Hide the password confirmation controls
         window_handle = GetDlgItem(IDC_PASSWDCONFIRM);
@@ -177,26 +168,34 @@ LRESULT PasswdDialog::OnClickedOK(WORD wNotifyCode,
 {
     bHandled = TRUE;
 
+    // Determine the length of the input
+    int password_length = static_cast<int>(
+        std::max(SendDlgItemMessage(IDC_PASSWD, WM_GETTEXTLENGTH, 0, 0),
+                 LRESULT(0)));
+
     // Reserve space for the password (+1 for null terminator)
-    password.resize(Max_Password_Length + 1, L'\0');
+    password.resize(password_length + 1, L'\0');
 
     // Retrieve the password from the dialog
-    GetDlgItemText(IDC_PASSWD, password.data(), Max_Password_Length + 1);
+    GetDlgItemText(IDC_PASSWD, password.data(), password_length + 1);
 
     // Determine the actual text length
     password.resize(wcslen(password.data()));
 
-    // If we are encrypting files, check to make sure that the
-    // password entered into the conformation field matches.
-    // If decrypting, the confirmation is not necessary.
-    if (encrypting)
+    // If encrypting files, check to make sure that the password entered into
+    // the conformation field matches
+    if (encrypting == true)
     {
-        SecureWString password_confirm(Max_Password_Length + 1, L'\0');
+        int password_confirm_length = static_cast<int>(std::max(
+            SendDlgItemMessage(IDC_PASSWDCONFIRM, WM_GETTEXTLENGTH, 0, 0),
+            LRESULT(0)));
+
+        SecureWString password_confirm(password_confirm_length + 1, L'\0');
 
         // Retrieve the password confirmation from the dialog
         GetDlgItemText(IDC_PASSWDCONFIRM,
                        password_confirm.data(),
-                       Max_Password_Length);
+                       password_confirm_length + 1);
 
         // Determine the actual text length
         password_confirm.resize(wcslen(password_confirm.data()));
