@@ -17,7 +17,7 @@ FetchContent_Declare(aescrypt_engine
 # Fetch the AES Crypt CLI repository
 FetchContent_Declare(aescrypt_cli
     GIT_REPOSITORY ${TERRAPANE_SOURCE_URI}/aescrypt_cli.git
-    GIT_TAG        v4.0.0
+    GIT_TAG        v4.0.1
     GIT_SHALLOW    true)
 
 # Make dependencies available
