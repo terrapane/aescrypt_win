@@ -38,8 +38,6 @@
 // Minimum frequency with which to update the progress meter
 constexpr std::chrono::milliseconds Progress_Update_Minimum(250);
 
-#define MAKE_WIDE(s) L ## #s
-
 namespace
 {
 
