@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.21)
+cmake_minimum_required (VERSION 3.21)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if(POLICY CMP0141)
@@ -8,6 +8,7 @@ endif()
 
 # Define the dependencies project
 project(aescrypt_dependencies
+        VERSION 4.0.3.0
         DESCRIPTION  "AES Crypt for Windows Dependencies"
         HOMEPAGE_URL "https://www.aescrypt.com")
 
