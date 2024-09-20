@@ -52,8 +52,7 @@ SecureU8String PasswordConvertUTF8(std::span<const wchar_t> password,
     // Prepare a buffer large enough (final length will be determined later)
     // Note: This UTF-8 string needs to be 50% larger than the input string
     //       in octets.  Since password.size() is a count of 2-octet characters
-    //       then we can accomplish this by multiplying the size by 3.  The
-    //       actual encoded string might be shorter, so it is reduced below.
+    //       then we can accomplish this by multiplying the size by 3.
     SecureU8String u8password(static_cast<std::size_t>(password.size() * 3),
                               '\0');
 

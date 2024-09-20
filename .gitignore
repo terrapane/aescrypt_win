@@ -17,3 +17,5 @@ aescrypt_ps/x32/*
 out/
 setup/Release/
 setup/Debug/
+packages/
+metadata.json
