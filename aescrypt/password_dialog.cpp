@@ -123,7 +123,7 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
     CenterWindow(GetForegroundWindow());
 
     // If not encrypting, hide the password confirmation controls
-    if (encrypting == false)
+    if (!encrypting)
     {
         // Hide the password confirmation controls
         window_handle = GetDlgItem(IDC_PASSWDCONFIRM);
@@ -184,7 +184,7 @@ LRESULT PasswdDialog::OnClickedOK(WORD wNotifyCode,
 
     // If encrypting files, check to make sure that the password entered into
     // the conformation field matches
-    if (encrypting == true)
+    if (encrypting)
     {
         int password_confirm_length = static_cast<int>(std::max(
             SendDlgItemMessage(IDC_PASSWDCONFIRM, WM_GETTEXTLENGTH, 0, 0),

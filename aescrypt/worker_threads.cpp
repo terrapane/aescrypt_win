@@ -561,7 +561,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
         }
 
         // Did the encryption process fail?
-        if (result == false)
+        if (!result)
         {
             // Remove the partial output file if it's not stdout
             if (remove_on_fail)
@@ -579,7 +579,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
         }
 
         // If the user clicks cancel or closes the dialog, stop processing
-        if (progress_dialog.WasCancelPressed() == true) break;
+        if (progress_dialog.WasCancelPressed()) break;
     }
 
     // Destroy the progress window
@@ -647,7 +647,7 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
     std::chrono::steady_clock::time_point last_update_time =
         std::chrono::steady_clock::now();
 
-    // Define the update interveral (progress bar has 100 positions)
+    // Define the update interval (progress bar has 100 positions)
     std::size_t update_interval = input_size / 100;
 
     // If the interval is really tiny, just update once -- but only if the
@@ -711,7 +711,7 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
     {
         // If the user clicks cancel (or closes the dialog), stop the
         // encryption thread
-        if (progress_dialog.WasCancelPressed() == true)
+        if (progress_dialog.WasCancelPressed())
         {
             lock.unlock();
             encryptor.Cancel();
@@ -953,7 +953,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         }
 
         // Did the decryption process fail?
-        if (result == false)
+        if (!result)
         {
             // Remove the partial output file if it's not stdout
             if (remove_on_fail)
@@ -971,7 +971,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         }
 
         // If the user clicks cancel or closes the dialog, stop processing
-        if (progress_dialog.WasCancelPressed() == true) break;
+        if (progress_dialog.WasCancelPressed()) break;
     }
 
     // Destroy the progress window
@@ -1031,7 +1031,7 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
     std::chrono::steady_clock::time_point last_update_time =
         std::chrono::steady_clock::now();
 
-    // Define the update interveral (progress bar has 100 positions)
+    // Define the update interval (progress bar has 100 positions)
     std::size_t update_interval = input_size / 100;
 
     // If the interval is really tiny, just update once -- but only if the
@@ -1093,7 +1093,7 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
     {
         // If the user clicks cancel (or closes the dialog), stop the
         // decryption thread
-        if (progress_dialog.WasCancelPressed() == true)
+        if (progress_dialog.WasCancelPressed())
         {
             lock.unlock();
             decryptor.Cancel();

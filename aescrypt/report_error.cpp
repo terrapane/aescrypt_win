@@ -56,7 +56,7 @@ void ReportError(const std::wstring &window_title,
     static_assert(sizeof(wchar_t) == 2);
 
     // Convert the string from UTF-8 to UTF-16
-    auto [result, length] = Terra::CharUtil::ConvertUTF8ToUTF16(
+    auto [convert_success, length] = Terra::CharUtil::ConvertUTF8ToUTF16(
         {reinterpret_cast<const std::uint8_t *>(message.data()),
          message.size()},
         {reinterpret_cast<std::uint8_t *>(unicode_message.data()),
@@ -64,14 +64,14 @@ void ReportError(const std::wstring &window_title,
         Terra::BitUtil::IsLittleEndian());
 
     // If conversion was successful, render the message
-    if (result == true)
+    if (convert_success)
     {
-        // The length is octets, resize to two-octet characters
+        // The length is in octets, resize to two-octet characters
         unicode_message.resize(length / 2);
     }
     else
     {
-        unicode_message = L"Error occurred, as did a UTF-8 conversion";
+        unicode_message = L"Error occurred, as did a UTF-8 conversion error";
     }
 
     ReportError(window_title, unicode_message, reason);

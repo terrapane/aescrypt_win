@@ -161,14 +161,14 @@ HRESULT AESCryptShellExtension::Initialize(LPCITEMIDLIST pidlFolder,
             aes_files = true;
 
             // Do not allow mixing of file types
-            if (non_aes_files == true) break;
+            if (non_aes_files) break;
         }
         else
         {
             non_aes_files = true;
 
             // Do not allow mixing of file types
-            if (aes_files == true) break;
+            if (aes_files) break;
         }
 
         file_list.emplace_back(std::move(filename));
@@ -179,7 +179,7 @@ HRESULT AESCryptShellExtension::Initialize(LPCITEMIDLIST pidlFolder,
     ReleaseStgMedium(&stg);
 
     // Do not show the menu if both a mix of .aes and non-.aes files seen
-    if ((aes_files == true) && (non_aes_files == true)) return E_INVALIDARG;
+    if (aes_files && non_aes_files) return E_INVALIDARG;
 
     // If there are no files in the list, do not render a menu
     if (file_list.empty()) return E_INVALIDARG;
@@ -230,13 +230,13 @@ HRESULT AESCryptShellExtension::QueryContextMenu(HMENU hMenu,
 
     // Should not happen, but do nothing if both .aes and non-.aes files seen
     // or if the file list is empty
-    if (((aes_files == true) && (non_aes_files == true)) || file_list.empty())
+    if ((aes_files && non_aes_files) || file_list.empty())
     {
         return MAKE_HRESULT(SEVERITY_SUCCESS, FACILITY_NULL, 0);
     }
 
     // Insert the menu choice
-    if (aes_files == true)
+    if (aes_files)
     {
         InsertMenu(hMenu,
                    uMenuIndex,
@@ -318,7 +318,7 @@ HRESULT AESCryptShellExtension::GetCommandString(UINT idCmd,
     switch (uType)
     {
         case GCS_HELPTEXT:
-            if (aes_files == true)
+            if (aes_files)
             {
                 command_text = L"Decrypt selected AES file(s)";
             }
@@ -338,7 +338,7 @@ HRESULT AESCryptShellExtension::GetCommandString(UINT idCmd,
             break;
 
         case GCS_VERB:
-            if (aes_files == true)
+            if (aes_files)
             {
                 command_text = L"AES Decrypt";
             }
@@ -347,7 +347,7 @@ HRESULT AESCryptShellExtension::GetCommandString(UINT idCmd,
                 command_text = L"AES Encrypt";
             }
 
-            // Copy the verbtext into the supplied buffer
+            // Copy the verb text into the supplied buffer
             if (!lstrcpynW(reinterpret_cast<PWSTR>(szName),
                            command_text,
                            cchMax))
@@ -396,7 +396,7 @@ HRESULT AESCryptShellExtension::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
     }
 
     // The menu item was invoked, so process the list of files
-    Worker_Threads.ProcessFiles(file_list, (non_aes_files == TRUE));
+    Worker_Threads.ProcessFiles(file_list, (non_aes_files == true));
 
     // Clear the file list
     file_list.clear();

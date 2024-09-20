@@ -50,12 +50,15 @@ SecureU8String PasswordConvertUTF8(std::span<const wchar_t> password,
     static_assert(sizeof(wchar_t) == 2);
 
     // Prepare a buffer large enough (final length will be determined later)
-    SecureU8String u8password(
-        static_cast<std::size_t>(password.size() * sizeof(wchar_t) * 1.5),
-        '\0');
+    // Note: This UTF-8 string needs to be 50% larger than the input string
+    //       in octets.  Since password.size() is a count of 2-octet characters
+    //       then we can accomplish this by multiplying the size by 3.  The
+    //       actual encoded string might be shorter, so it is reduced below.
+    SecureU8String u8password(static_cast<std::size_t>(password.size() * 3),
+                              '\0');
 
     // Convert the character string to UTF-8
-    auto [result, length] = Terra::CharUtil::ConvertUTF16ToUTF8(
+    auto [convert_success, length] = Terra::CharUtil::ConvertUTF16ToUTF8(
         std::span<const std::uint8_t>(
             reinterpret_cast<const std::uint8_t *>(password.data()),
             password.size() * sizeof(wchar_t)),
@@ -64,8 +67,8 @@ SecureU8String PasswordConvertUTF8(std::span<const wchar_t> password,
             u8password.size()),
         little_endian);
 
-    // Verify the result
-    if ((result == false) || (length == 0)) return {};
+    // Verify the that the conversion was successful and non-zero length
+    if (!convert_success || (length == 0)) return {};
 
     // Adjust the password length
     u8password.resize(length);
