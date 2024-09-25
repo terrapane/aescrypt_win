@@ -29,7 +29,8 @@
  *      Constructor for the PasswdDialog object.
  *
  *  Parameters:
- *      None.
+ *      window_title [in]
+ *          The title of the window used to display error messages.
  *
  *  Returns:
  *      Nothing.

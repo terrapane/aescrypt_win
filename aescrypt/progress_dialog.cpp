@@ -9,8 +9,8 @@
  *      Paul E. Jones <paulej@packetizer.com>
  *
  *  Description:
- *      This file implements a simple progress box class for showing the progress
- *      of file encryption and decryption.
+ *      This file implements a simple progress box class for showing the
+ *      progress of file encryption and decryption.
  *
  *  Portability Issues:
  *      Windows specific code.
@@ -28,7 +28,12 @@
  *      Constructor for the ProgressDialog object.
  *
  *  Parameters:
- *      None.
+ *      notify_cancel [in]
+ *          Function to call when the user presses cancel or closes the window.
+ *
+ *      hide_on_cancel [in]
+ *          Automatically hide the window if the user presses cancel or closes
+ *          the dialog window.
  *
  *  Returns:
  *      Nothing.
@@ -36,11 +41,13 @@
  *  Comments:
  *      None.
  */
-ProgressDialog::ProgressDialog(std::function<void()> notify_cancel) :
+ProgressDialog::ProgressDialog(std::function<void()> notify_cancel,
+                               bool hide_on_cancel) :
     ATL::CAxDialogImpl<ProgressDialog>(),
     cancel_pressed{false},
     hIcon{},
-    notify_cancel{notify_cancel}
+    notify_cancel{notify_cancel},
+    hide_on_cancel{hide_on_cancel}
 {
     // Load the icon to show on the system menu
     hIcon =
@@ -74,15 +81,14 @@ ProgressDialog::~ProgressDialog()
 }
 
 /*
- *  PasswdDialog::OnInitDialog()
+ *  ProgressDialog::OnInitDialog()
  *
  *  Description:
  *      Called when the dialog box is initialized.
  *
  *  Parameters:
  *      uMsg [in]
- *          The associated Windows message. This is usually WM_INITDIALOG,
- *          but really insignificant.
+ *          The associated Windows message. This should be WM_INITDIALOG.
  *
  *      wParam [in]
  *          Word parameter, but not used by this function.
@@ -143,11 +149,101 @@ LRESULT ProgressDialog::OnInitDialog(UINT uMsg,
             static_cast<LPARAM>(static_cast<COLORREF>(RGB(0, 102, 204))));
     }
 
+    // Returning 1 puts focus to be placed on this window
     return 1;
 }
 
 /*
- *  PasswdDialog::OnClickedCancel()
+ *  ProgressDialog::OnQueryEndSession()
+ *
+ *  Description:
+ *      Called when the Windows asks if it can end the application.
+ *
+ *  Parameters:
+ *      uMsg [in]
+ *          The associated Windows message. This should be be
+ *          WM_QUERYENDSESSION.
+ *
+ *      wParam [in]
+ *          Word parameter, but not used by this function.
+ *
+ *      lParam [in]
+ *          This parameters will hold ENDSESSION_CLOSEAPP if the application
+ *          wishes to shut down or ENDSESSION_LOGOFF if the user is logging
+ *          off.  It might also be ENDSESSION_CRITICAL.  AES Crypt can terminate
+ *          in all cases.
+ *
+ *      bHandled [out]
+ *          This is set to true if this function handles the message.
+ *
+ *  Returns:
+ *      Returns TRUE since the application can be terminated.
+ *
+ *  Comments:
+ *      None.
+ */
+LRESULT ProgressDialog::OnQueryEndSession(UINT uMsg,
+                                          WPARAM wParam,
+                                          LPARAM lParam,
+                                          BOOL &bHandled)
+{
+    // Indicate that the message was handled
+    bHandled = TRUE;
+
+    // Indicate that termination is possible
+    return TRUE;
+}
+
+/*
+ *  ProgressDialog::OnEndSession()
+ *
+ *  Description:
+ *      Called when Windows indicates it is terminating the application.
+ *
+ *  Parameters:
+ *      uMsg [in]
+ *          The associated Windows message. This should be be WM_ENDSESSION.
+ *
+ *      wParam [in]
+ *          Word parameter, set to true if the application should end.
+ *
+ *      lParam [in]
+ *          This parameters will hold ENDSESSION_CLOSEAPP, ENDSESSION_LOGOFF,
+ *          or ENDSESSION_CRITICAL.  The value is not important for this
+ *          dialog.
+ *
+ *      bHandled [out]
+ *          This is set to true if this function handles the message.
+ *
+ *  Returns:
+ *      Returns zero to indicate success.
+ *
+ *  Comments:
+ *      None.
+ */
+LRESULT ProgressDialog::OnEndSession(UINT uMsg,
+                                     WPARAM wParam,
+                                     LPARAM lParam,
+                                     BOOL &bHandled)
+{
+    // Indicate that the message was handled
+    bHandled = TRUE;
+
+    // If non-zero, the application should terminate
+    if (wParam != 0)
+    {
+        // Indicate that processing was cancelled
+        cancel_pressed.store(true);
+
+        // Issue the notification callback if defined
+        if (notify_cancel) notify_cancel();
+    }
+
+    return 0;
+}
+
+/*
+ *  ProgressDialog::OnClickedCancel()
  *
  *  Description:
  *      Actions to take when the user presses cancel or closes the dialog.
@@ -177,13 +273,17 @@ LRESULT ProgressDialog::OnClickedCancel(WORD wNotifyCode,
                                         HWND hWndCtl,
                                         BOOL &bHandled)
 {
+    // Indicate that the message was handled
     bHandled = TRUE;
 
     // Indicate that processing was cancelled
-    cancel_pressed = true;
+    cancel_pressed.store(true);
 
     // Issue the notification callback if defined
     if (notify_cancel) notify_cancel();
+
+    // Hide the window once it is cancelled (if configured to do so)
+    if (hide_on_cancel) ShowWindow(SW_HIDE);
 
     return 0;
 }
@@ -206,5 +306,5 @@ LRESULT ProgressDialog::OnClickedCancel(WORD wNotifyCode,
  */
 bool ProgressDialog::WasCancelPressed()
 {
-    return cancel_pressed;
+    return cancel_pressed.load();
 }

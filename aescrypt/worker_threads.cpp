@@ -38,6 +38,9 @@
 // Minimum frequency with which to update the progress meter
 constexpr std::chrono::milliseconds Progress_Update_Minimum(250);
 
+// Minimum progress meter update interval
+constexpr std::size_t Minimal_Interval = 16 * 100;
+
 namespace
 {
 
@@ -107,7 +110,7 @@ WorkerThreads::WorkerThreads() : thread_count{0}
     }
     else
     {
-        // Perhaps redundant, but preference is to load the resource string
+        // Perhaps redundant, use this if the resource string does not load
         application_name = L"AES Crypt";
     }
 
@@ -414,18 +417,53 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
     // If the file list is empty, just return
     if (file_list.empty()) return;
 
-    // Create a progress dialog that will notify waiting threads on cancel
-    ProgressDialog progress_dialog([&]() { cv.notify_all(); });
+    // Create a progress dialog that will notify the waiting thread
+    ProgressDialog progress_dialog(
+        [&]()
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            cv.notify_all();
+        });
 
     // Define the extensions to insert into the header
     const std::vector<std::pair<std::string, std::string>> extensions =
     {
-        {"CREATED_BY", std::string(Program_Name) + " " + Program_Version}
+        {"CREATED_BY", Program_Name + " " + Program_Version}
     };
 
-    // Passing a non-zero instructs the dialog to display "Encrypting..."
-    progress_dialog.Create(GetDesktopWindow(), LPARAM(1));
-    progress_dialog.ShowWindow(SW_SHOWNORMAL);
+    // Create an event used to indicate the progress dialog is ready
+    HANDLE event_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    // Create a thread to service the windows message loop for the dialog
+    std::thread progress_thread(
+        [&]()
+        {
+            try
+            {
+                // Non-zero LPARAM displays "Encrypting"
+                progress_dialog.Create(GetDesktopWindow(), LPARAM(1));
+                progress_dialog.ShowWindow(SW_SHOWNORMAL);
+
+                // Signal that the progress dialog is ready
+                SetEvent(event_handle);
+
+                // Process messages
+                WindowsMessageLoop();
+
+                // Destroy the progress window
+                progress_dialog.DestroyWindow();
+            }
+            catch (...)
+            {
+                ::ReportError(application_error,
+                              L"Unexpected error in progress dialog thread",
+                              ERROR_SUCCESS);
+            }
+        });
+
+    // Wait for the progress window to open
+    WaitForSingleObject(event_handle, INFINITE);
+    CloseHandle(event_handle);
 
     // Iterate over the list of files
     for (const auto &in_file : file_list)
@@ -440,9 +478,6 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
 
         // Display the file name
         progress_dialog.SetDlgItemText(IDC_FILENAME, in_file.c_str());
-
-        // Service the message loop to ensure an up-to-date display
-        DoMessageLoop();
 
         try
         {
@@ -578,15 +613,16 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
             break;
         }
 
-        // If the user clicks cancel or closes the dialog, stop processing
+        // If the user clicked cancel or closed the dialog, stop processing
         if (progress_dialog.WasCancelPressed()) break;
     }
 
-    // Destroy the progress window
-    progress_dialog.DestroyWindow();
+    // Instruct the progress window to terminate
+    DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
+    PostThreadMessage(progress_thread_id, WM_QUIT, 0, 0);
 
-    // Process Windows messages
-    DoMessageLoop();
+    // Wait for the progress window thread to complete
+    progress_thread.join();
 }
 
 /*
@@ -637,7 +673,7 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
                                   std::ostream &ostream)
 {
     Terra::AESCrypt::Engine::Encryptor encryptor;
-    Terra::AESCrypt::Engine::EncryptResult encrypt_result;
+    Terra::AESCrypt::Engine::EncryptResult encrypt_result{};
     bool encryption_complete{};
     bool cancel_encryption{};
     std::atomic<std::size_t> current_meter_position{};
@@ -652,7 +688,7 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
 
     // If the interval is really tiny, just update once -- but only if the
     // input size is known
-    if ((update_interval < 16 * 100) && (input_size > 0))
+    if ((update_interval < Minimal_Interval) && (input_size > 0))
     {
         update_interval = std::numeric_limits<std::size_t>::max();
     }
@@ -709,7 +745,7 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
     // Wait for encryption to complete or to be told to terminate
     while (!encryption_complete)
     {
-        // If the user clicks cancel (or closes the dialog), stop the
+        // If the user clicked cancel (or closed the dialog), stop the
         // encryption thread
         if (progress_dialog.WasCancelPressed())
         {
@@ -724,7 +760,8 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
                 [&]() -> bool
                 {
                     return encryption_complete ||
-                           (current_meter_position != last_meter_position);
+                           (current_meter_position != last_meter_position) ||
+                           progress_dialog.WasCancelPressed();
                 });
 
         // Service the message loop to ensure an up-to-date display
@@ -741,7 +778,6 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
             last_meter_position = new_meter_position;
         }
 
-        DoMessageLoop();
         lock.lock();
     }
 
@@ -813,12 +849,47 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         }
     }
 
-    // Create a progress dialog that will notify waiting threads on cancel
-    ProgressDialog progress_dialog([&]() { cv.notify_all(); });
+    // Create a progress dialog that will notify the waiting thread
+    ProgressDialog progress_dialog(
+        [&]()
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            cv.notify_all();
+        });
 
-    // Passing a non-zero instructs the dialog to display "Decrypting..."
-    progress_dialog.Create(GetDesktopWindow(), LPARAM(0));
-    progress_dialog.ShowWindow(SW_SHOWNORMAL);
+    // Create an event used to indicate the progress dialog is ready
+    HANDLE event_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    // Create a thread to service the windows message loop for the dialog
+    std::thread progress_thread(
+        [&]()
+        {
+            try
+            {
+                // Zero LPARAM displays "Decrypting"
+                progress_dialog.Create(GetDesktopWindow(), LPARAM(0));
+                progress_dialog.ShowWindow(SW_SHOWNORMAL);
+
+                // Signal that the progress dialog is ready
+                SetEvent(event_handle);
+
+                // Process messages
+                WindowsMessageLoop();
+
+                // Destroy the progress window
+                progress_dialog.DestroyWindow();
+            }
+            catch (...)
+            {
+                ::ReportError(application_error,
+                              L"Unexpected error in progress dialog thread",
+                              ERROR_SUCCESS);
+            }
+        });
+
+    // Wait for the progress window to open
+    WaitForSingleObject(event_handle, INFINITE);
+    CloseHandle(event_handle);
 
     // Iterate over the list of files
     for (const auto &in_file : file_list)
@@ -833,9 +904,6 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
 
         // Display the file name
         progress_dialog.SetDlgItemText(IDC_FILENAME, in_file.c_str());
-
-        // Service the message loop to ensure an up-to-date display
-        DoMessageLoop();
 
         try
         {
@@ -970,15 +1038,16 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
             break;
         }
 
-        // If the user clicks cancel or closes the dialog, stop processing
+        // If the user clicked cancel or closed the dialog, stop processing
         if (progress_dialog.WasCancelPressed()) break;
     }
 
-    // Destroy the progress window
-    progress_dialog.DestroyWindow();
+    // Instruct the progress window to terminate
+    DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
+    PostThreadMessage(progress_thread_id, WM_QUIT, 0, 0);
 
-    // Process Windows messages
-    DoMessageLoop();
+    // Wait for the progress window thread to complete
+    progress_thread.join();
 }
 
 /*
@@ -1021,7 +1090,7 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
                                   std::ostream &ostream)
 {
     Terra::AESCrypt::Engine::Decryptor decryptor;
-    Terra::AESCrypt::Engine::DecryptResult decrypt_result;
+    Terra::AESCrypt::Engine::DecryptResult decrypt_result{};
     bool decryption_complete{};
     bool cancel_decryption{};
     std::atomic<std::size_t> current_meter_position{};
@@ -1036,7 +1105,7 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
 
     // If the interval is really tiny, just update once -- but only if the
     // input size is known
-    if ((update_interval < 16 * 100) && (input_size > 0))
+    if ((update_interval < Minimal_Interval) && (input_size > 0))
     {
         update_interval = std::numeric_limits<std::size_t>::max();
     }
@@ -1091,7 +1160,7 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
     // Wait for decryption to complete or to be told to terminate
     while (!decryption_complete)
     {
-        // If the user clicks cancel (or closes the dialog), stop the
+        // If the user clicked cancel (or closed the dialog), stop the
         // decryption thread
         if (progress_dialog.WasCancelPressed())
         {
@@ -1106,7 +1175,8 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
                 [&]() -> bool
                 {
                     return decryption_complete ||
-                           (current_meter_position != last_meter_position);
+                           (current_meter_position != last_meter_position) ||
+                           progress_dialog.WasCancelPressed();
                 });
 
         // Service the message loop to ensure an up-to-date display
@@ -1123,7 +1193,6 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
             last_meter_position = new_meter_position;
         }
 
-        DoMessageLoop();
         lock.lock();
     }
 
@@ -1155,10 +1224,10 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
 }
 
 /*
- *  WorkerThreads::DoMessageLoop()
+ *  WorkerThreads::WindowsMessageLoop()
  *
  *  Description:
- *      This routine will service the windows message queues for the running
+ *      This routine will service the Windows message queues for the running
  *      thread so that messages are delivered and windows are properly updated.
  *
  *  Parameters:
@@ -1171,11 +1240,12 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
  *      None.
  */
 
-inline void WorkerThreads::DoMessageLoop()
+void WorkerThreads::WindowsMessageLoop()
 {
     MSG msg;
 
-    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+    // Process messages until WM_QUIT is received
+    while (GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);

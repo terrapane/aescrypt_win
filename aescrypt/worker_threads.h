@@ -90,7 +90,7 @@ class WorkerThreads
                            std::istream &istream,
                            std::ostream &ostream);
 
-        void DoMessageLoop();
+        void WindowsMessageLoop();
 
         std::wstring application_name;
         std::wstring application_error;

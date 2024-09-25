@@ -18,6 +18,7 @@
 
 #pragma once
 
-#define Program_Name        "aescrypt (Windows GUI)"
-#define Program_Version     "4.0.3"
-#define Program_Date        "September 2, 2024"
+#include <string>
+
+constexpr std::string Program_Name    = "aescrypt_win";
+constexpr std::string Program_Version = "4.0.3";
