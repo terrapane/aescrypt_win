@@ -23,6 +23,7 @@
 #include <limits>
 #include <chrono>
 #include <atomic>
+#include <stdexcept>
 #include <terra/aescrypt/engine/encryptor.h>
 #include <terra/aescrypt/engine/decryptor.h>
 #include <terra/charutil/character_utilities.h>
@@ -43,6 +44,8 @@ constexpr std::size_t Minimal_Interval = 16 * 100;
 
 namespace
 {
+
+std::wstring Application_Name = L"AES Crypt";
 
 /*
  *  ThreadEntry()
@@ -65,10 +68,24 @@ namespace
  */
 DWORD WINAPI ThreadEntry(LPVOID lpParameter)
 {
-    WorkerThreads *aes_crypt_worker_threads =
-        reinterpret_cast<WorkerThreads *>(lpParameter);
+    try
+    {
+        WorkerThreads *aes_crypt_worker_threads =
+            reinterpret_cast<WorkerThreads *>(lpParameter);
 
-    aes_crypt_worker_threads->ThreadEntry();
+        aes_crypt_worker_threads->ThreadEntry();
+    }
+    catch (const std::exception &e)
+    {
+        ::ReportError(Application_Name + L" Error",
+                      L"Unhandled exception in worker thread: ",
+                      e.what());
+    }
+    catch (...)
+    {
+        ::ReportError(Application_Name + L" Error",
+                      L"Unhandled exception in worker thread");
+    }
 
     return 0;
 }
@@ -111,7 +128,7 @@ WorkerThreads::WorkerThreads() : thread_count{0}
     else
     {
         // Perhaps redundant, use this if the resource string does not load
-        application_name = L"AES Crypt";
+        application_name = Application_Name;
     }
 
     application_error = application_name + L" Error";
@@ -370,14 +387,28 @@ void WorkerThreads::ThreadEntry()
     // Leave the critical section since necessary data is now local
     LeaveCriticalSection(&critical_section);
 
-    // Encrypt or decrypt files based on the request
-    if (request.encrypt)
+    try
     {
-        EncryptFiles(request.file_list, request.password);
+        // Encrypt or decrypt files based on the request
+        if (request.encrypt)
+        {
+            EncryptFiles(request.file_list, request.password);
+        }
+        else
+        {
+            DecryptFiles(request.file_list, request.password);
+        }
     }
-    else
+    catch (const std::exception &e)
     {
-        DecryptFiles(request.file_list, request.password);
+        ::ReportError(application_error,
+                      L"Unhandled exception processing file(s): ",
+                      e.what());
+    }
+    catch (...)
+    {
+        ::ReportError(application_error,
+                      L"Unhandled exception processing file(s)");
     }
 
     // Once done, decrement the thread count, clean up memory, etc.
@@ -410,6 +441,9 @@ void WorkerThreads::ThreadEntry()
 void WorkerThreads::EncryptFiles(const FileList &file_list,
                                  const SecureU8String &password)
 {
+    std::condition_variable cv;
+    std::mutex mutex;
+
     // Secure buffer for file I/O
     SecureVector<char> read_buffer(Buffered_IO_Size, 0);
     SecureVector<char> write_buffer(Buffered_IO_Size, 0);
@@ -453,11 +487,16 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
                 // Destroy the progress window
                 progress_dialog.DestroyWindow();
             }
-            catch (...)
+            catch (const std::exception &e)
             {
                 ::ReportError(application_error,
                               L"Unexpected error in progress dialog thread",
-                              ERROR_SUCCESS);
+                              e.what());
+            }
+            catch (...)
+            {
+                ::ReportError(application_error,
+                              L"Unexpected error in progress dialog thread");
             }
         });
 
@@ -500,6 +539,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
         {
             // Nothing we can do, but an error will be presented below
         }
+
         if (!ifs.good() || !ifs.is_open())
         {
             DWORD error_code = ERROR_SUCCESS;
@@ -540,13 +580,20 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
                 break;
             }
         }
+        catch (const std::exception &e)
+        {
+            ::ReportError(application_error,
+                          std::wstring(L"Unexpected error processing ") +
+                              in_file,
+                          e.what());
+            break;
+        }
         catch (...)
         {
             // Report an error opening the file
             ::ReportError(application_error,
                           std::wstring(L"Unexpected error processing ") +
                               in_file);
-
             break;
         }
 
@@ -577,7 +624,9 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
         ofs.rdbuf()->pubsetbuf(write_buffer.data(), write_buffer.size());
 
         // Encrypt the input stream
-        bool result = EncryptStream(progress_dialog,
+        bool result = EncryptStream(cv,
+                                    mutex,
+                                    progress_dialog,
                                     in_file,
                                     password,
                                     KDF_Iterations,
@@ -633,6 +682,12 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
  *      stream using the specified password.
  *
  *  Parameters:
+ *      cv [in]
+ *          Condition variable used for thread syncronization
+ *
+ *      mutex [in]
+ *          Mutex used in association with the above condition variable.
+ *
  *      progress_dialog [in]
  *          A reference to the progress dialog that shows encryption progress.
  *
@@ -663,7 +718,9 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
  *  Comments:
  *      None.
  */
-bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
+bool WorkerThreads::EncryptStream(std::condition_variable &cv,
+                                  std::mutex &mutex,
+                                  ProgressDialog &progress_dialog,
                                   const std::wstring &filename,
                                   const SecureU8String &password,
                                   const std::uint32_t iterations,
@@ -697,6 +754,8 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
     auto progress_updater = [&]([[maybe_unused]]const std::string &instance,
                                 std::size_t position)
     {
+        std::lock_guard<std::mutex> lock(mutex);
+
         // Dot not update if the input size is not known
         if (input_size == 0) return;
 
@@ -831,6 +890,9 @@ bool WorkerThreads::EncryptStream(ProgressDialog &progress_dialog,
 void WorkerThreads::DecryptFiles(const FileList &file_list,
                                  const SecureU8String &password)
 {
+    std::condition_variable cv;
+    std::mutex mutex;
+
     // Secure buffer for file I/O
     SecureVector<char> read_buffer(Buffered_IO_Size, 0);
     SecureVector<char> write_buffer(Buffered_IO_Size, 0);
@@ -879,11 +941,16 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
                 // Destroy the progress window
                 progress_dialog.DestroyWindow();
             }
-            catch (...)
+            catch (const std::exception &e)
             {
                 ::ReportError(application_error,
                               L"Unexpected error in progress dialog thread",
-                              ERROR_SUCCESS);
+                              e.what());
+            }
+            catch (...)
+            {
+                ::ReportError(application_error,
+                              L"Unexpected error in progress dialog thread");
             }
         });
 
@@ -926,6 +993,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         {
             // Nothing we can do, but an error will be presented below
         }
+
         if (!ifs.good() || !ifs.is_open())
         {
             DWORD error_code = ERROR_SUCCESS;
@@ -967,13 +1035,21 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
                 break;
             }
         }
+        catch (const std::exception &e)
+        {
+            // Report an error opening the file
+            ::ReportError(application_error,
+                          std::wstring(L"Unexpected error processing ") +
+                              in_file,
+                          e.what());
+            break;
+        }
         catch (...)
         {
             // Report an error opening the file
             ::ReportError(application_error,
                           std::wstring(L"Unexpected error processing ") +
                               in_file);
-
             break;
         }
 
@@ -987,6 +1063,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         {
             // Nothing we can do, but an error will be presented below
         }
+
         if (!ofs.good() || !ofs.is_open())
         {
             DWORD error_code = ERROR_SUCCESS;
@@ -1004,7 +1081,9 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         ofs.rdbuf()->pubsetbuf(write_buffer.data(), write_buffer.size());
 
         // Decrypt the input stream
-        bool result = DecryptStream(progress_dialog,
+        bool result = DecryptStream(cv,
+                                    mutex,
+                                    progress_dialog,
                                     in_file,
                                     password,
                                     file_size,
@@ -1058,6 +1137,12 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
  *      stream using the specified password.
  *
  *  Parameters:
+ *      cv [in]
+ *          Condition variable used for thread syncronization
+ *
+ *      mutex [in]
+ *          Mutex used in association with the above condition variable.
+ *
  *      progress_dialog [in]
  *          A reference to the progress dialog that shows decryption progress.
  *
@@ -1082,7 +1167,9 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
  *  Comments:
  *      None.
  */
-bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
+bool WorkerThreads::DecryptStream(std::condition_variable &cv,
+                                  std::mutex &mutex,
+                                  ProgressDialog &progress_dialog,
                                   const std::wstring &filename,
                                   const SecureU8String &password,
                                   const std::size_t input_size,
@@ -1114,6 +1201,8 @@ bool WorkerThreads::DecryptStream(ProgressDialog &progress_dialog,
     auto progress_updater = [&]([[maybe_unused]]const std::string &instance,
                                 std::size_t position)
     {
+        std::lock_guard<std::mutex> lock(mutex);
+
         // Dot not update if the input size is not known
         if (input_size == 0) return;
 

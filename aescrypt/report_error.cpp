@@ -94,6 +94,69 @@ void ReportError(const std::wstring &window_title,
  *      message [in]
  *         The message to show the user.
  *
+ *      error_string [in]
+ *          A UTF-8 error string that will be appended to the above message.
+ *
+ *      reason [in]
+ *         The reason for the error (generally, the value from GetLastError()).
+ *
+ *  Returns:
+ *      Nothing.
+ *
+ *  Comments:
+ *      None.
+ */
+void ReportError(const std::wstring &window_title,
+                 const std::wstring &message,
+                 const std::string &error_string,
+                 DWORD reason)
+{
+    std::wstring unicode_error(error_string.size(), L'\0');
+
+    // This function assumes wchar_t is two octets in length
+    static_assert(sizeof(wchar_t) == 2);
+
+    // Convert the string from UTF-8 to UTF-16
+    auto [convert_success, length] = Terra::CharUtil::ConvertUTF8ToUTF16(
+        {reinterpret_cast<const std::uint8_t *>(error_string.data()),
+         error_string.size()},
+        {reinterpret_cast<std::uint8_t *>(unicode_error.data()),
+         unicode_error.size() * sizeof(wchar_t)},
+        Terra::BitUtil::IsLittleEndian());
+
+    // If conversion was successful, render the message
+    if (convert_success)
+    {
+        // The length is in octets, resize to two-octet characters
+        unicode_error.resize(length / 2);
+    }
+    else
+    {
+        unicode_error = L"Error occurred, as did a UTF-8 conversion error";
+    }
+
+    std::wstring error_text = message + L": " + unicode_error;
+
+    ReportError(window_title, error_text, reason);
+}
+
+/*
+ *  ReportError()
+ *
+ *  Description:
+ *      This function will report an error to the user by displaying a
+ *      message box.  The message to render is provided as the first parameter.
+ *      The second parameter contains either ERROR_SUCCESS or some error
+ *      code from GetLastError().  If an error code is provided, the message
+ *      will be formatted for user consumption.
+ *
+ *  Parameters:
+ *      window_title [in]
+ *          The text of the title in the message box.
+ *
+ *      message [in]
+ *         The message to show the user.
+ *
  *      reason [in]
  *         The reason for the error (generally, the value from GetLastError()).
  *

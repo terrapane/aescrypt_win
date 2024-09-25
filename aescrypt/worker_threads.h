@@ -74,7 +74,9 @@ class WorkerThreads
         void DecryptFiles(const FileList &file_list,
                           const SecureU8String &password);
 
-        bool EncryptStream(ProgressDialog &progress_dialog,
+        bool EncryptStream(std::condition_variable &cv,
+                           std::mutex &mutex,
+                           ProgressDialog &progress_dialog,
                            const std::wstring &filename,
                            const SecureU8String &password,
                            const std::uint32_t iterations,
@@ -83,7 +85,9 @@ class WorkerThreads
                            std::istream &istream,
                            std::ostream &ostream);
 
-        bool DecryptStream(ProgressDialog &progress_dialog,
+        bool DecryptStream(std::condition_variable &cv,
+                           std::mutex &mutex,
+                           ProgressDialog &progress_dialog,
                            const std::wstring &filename,
                            const SecureU8String &password,
                            const std::size_t input_size,
@@ -98,6 +102,4 @@ class WorkerThreads
         std::deque<HANDLE> terminated_threads;
         std::deque<RequestData> requests;
         CRITICAL_SECTION critical_section;
-        std::condition_variable cv;
-        std::mutex mutex;
 };
