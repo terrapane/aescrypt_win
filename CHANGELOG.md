@@ -3,7 +3,8 @@
 v4.0.4 (not yet released)
     - Updated library dependencies
     - Updated the AES Crypt CLI version to the latest
-    - Minor code improvements
+    - Improved progress window responsiveness
+    - Various minor code improvements
 
 v4.0.3
     - Update CLI version to 4.0.2, which addressed key file handling issues
