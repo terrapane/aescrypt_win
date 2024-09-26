@@ -21,4 +21,4 @@
 #include <string>
 
 constexpr std::string Program_Name    = "aescrypt_win";
-constexpr std::string Program_Version = "4.0.3";
+constexpr std::string Program_Version = "4.0.4";

@@ -1,6 +1,6 @@
 # Change Log
 
-v4.0.4 (not yet released)
+v4.0.4
     - Updated library dependencies
     - Updated the AES Crypt CLI version to the latest
     - Improved progress window responsiveness
