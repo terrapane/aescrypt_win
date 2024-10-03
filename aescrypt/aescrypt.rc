@@ -48,8 +48,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,0,4,0
- PRODUCTVERSION 4,0,4,0
+ FILEVERSION 4,0,5,0
+ PRODUCTVERSION 4,0,5,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -67,12 +67,12 @@ BEGIN
             VALUE "Comments", "AES Crypt - Advanced File Encryption for Windows"
             VALUE "CompanyName", "Terrapane Corporation"
             VALUE "FileDescription", "AES Crypt Shell Extension Library"
-            VALUE "FileVersion", "4.0.4.0"
+            VALUE "FileVersion", "4.0.5.0"
             VALUE "InternalName", "aescrypt.dll"
             VALUE "LegalCopyright", "Copyright (C) 2024"
             VALUE "OriginalFilename", "aescrypt.dll"
             VALUE "ProductName", "AES Crypt"
-            VALUE "ProductVersion", "4.0.4.0"
+            VALUE "ProductVersion", "4.0.5.0"
         END
     END
     BLOCK "VarFileInfo"

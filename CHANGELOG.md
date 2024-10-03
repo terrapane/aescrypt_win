@@ -1,5 +1,8 @@
 # Change Log
 
+v4.0.5
+    - Removed use of constexpr string that caused a crash on some systems
+
 v4.0.4
     - Updated library dependencies
     - Updated the AES Crypt CLI version to the latest

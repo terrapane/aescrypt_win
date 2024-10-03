@@ -478,7 +478,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E6C003E3CE7B4E33933DB4D34FB8FA55"
             {
-            "SourcePath" = "8:..\\out\\install\\x64-release\\bin\\aescrypt.exe"
+            "SourcePath" = "8:..\\out\\install\\aescrypt.exe"
             "TargetName" = "8:aescrypt.exe"
             "Tag" = "8:"
             "Folder" = "8:_660A60A3C6744A01AAC5B8E0AB9B610E"
@@ -593,15 +593,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AES Crypt"
-        "ProductCode" = "8:{13B49465-83F7-462D-8521-F7917FEBE2C2}"
-        "PackageCode" = "8:{EFF9C956-5910-482B-9DB3-374565C943DC}"
+        "ProductCode" = "8:{01779927-8E03-4C15-BC0E-B2B59112A92E}"
+        "PackageCode" = "8:{B7B762C4-7485-4886-A052-F8D9F679F6F0}"
         "UpgradeCode" = "8:{92D16E60-1F16-4183-A78C-086C07CF436A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:4.0.4"
+        "ProductVersion" = "8:4.0.5"
         "Manufacturer" = "8:Terrapane Corporation"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://www.aescrypt.com/contact/"

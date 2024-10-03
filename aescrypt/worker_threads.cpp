@@ -462,7 +462,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
     // Define the extensions to insert into the header
     const std::vector<std::pair<std::string, std::string>> extensions =
     {
-        {"CREATED_BY", Program_Name + " " + Program_Version}
+        {"CREATED_BY", std::string(Program_Name) + " " + Program_Version}
     };
 
     // Create an event used to indicate the progress dialog is ready
@@ -727,12 +727,11 @@ bool WorkerThreads::EncryptStream(std::condition_variable &cv,
                                   const ExtensionList &extensions,
                                   const std::size_t input_size,
                                   std::istream &istream,
-                                  std::ostream &ostream)
+                                  std::ostream &ostream) const
 {
     Terra::AESCrypt::Engine::Encryptor encryptor;
     Terra::AESCrypt::Engine::EncryptResult encrypt_result{};
     bool encryption_complete{};
-    bool cancel_encryption{};
     std::atomic<std::size_t> current_meter_position{};
     std::size_t last_meter_position{};
 
@@ -1174,12 +1173,11 @@ bool WorkerThreads::DecryptStream(std::condition_variable &cv,
                                   const SecureU8String &password,
                                   const std::size_t input_size,
                                   std::istream &istream,
-                                  std::ostream &ostream)
+                                  std::ostream &ostream) const
 {
     Terra::AESCrypt::Engine::Decryptor decryptor;
     Terra::AESCrypt::Engine::DecryptResult decrypt_result{};
     bool decryption_complete{};
-    bool cancel_decryption{};
     std::atomic<std::size_t> current_meter_position{};
     std::size_t last_meter_position{};
 

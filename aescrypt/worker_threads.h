@@ -83,7 +83,7 @@ class WorkerThreads
                            const ExtensionList &extensions,
                            const std::size_t input_size,
                            std::istream &istream,
-                           std::ostream &ostream);
+                           std::ostream &ostream) const;
 
         bool DecryptStream(std::condition_variable &cv,
                            std::mutex &mutex,
@@ -92,7 +92,7 @@ class WorkerThreads
                            const SecureU8String &password,
                            const std::size_t input_size,
                            std::istream &istream,
-                           std::ostream &ostream);
+                           std::ostream &ostream) const;
 
         void WindowsMessageLoop();
 

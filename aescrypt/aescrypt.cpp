@@ -76,7 +76,7 @@ STDAPI  DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOI
 STDAPI DllRegisterServer()
 {
     ATL::CRegKey reg;
-    LONG result;
+    LSTATUS result;
 
     result = reg.Open(HKEY_LOCAL_MACHINE,
                       L"Software\\Microsoft\\Windows\\CurrentVersion\\Shell "
@@ -97,7 +97,7 @@ STDAPI DllRegisterServer()
 STDAPI DllUnregisterServer()
 {
     ATL::CRegKey reg;
-    LONG result;
+    LSTATUS result;
 
     result = reg.Open(HKEY_LOCAL_MACHINE,
                       L"Software\\Microsoft\\Windows\\CurrentVersion\\Shell "
@@ -106,7 +106,7 @@ STDAPI DllUnregisterServer()
 
     if (result == ERROR_SUCCESS)
     {
-        result = reg.DeleteValue(L"{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}");
+        reg.DeleteValue(L"{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}");
     }
 
     HRESULT hr = AES_Crypt_Module.DllUnregisterServer(FALSE);

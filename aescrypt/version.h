@@ -10,7 +10,7 @@
  *
  *  Description:
  *      This file contains software version information that will be embedded in
- *      the binary library.
+ *      the binary library and used in the produced .aes files.
  *
  *  Portability Issues:
  *      None.
@@ -18,7 +18,5 @@
 
 #pragma once
 
-#include <string>
-
-constexpr std::string Program_Name    = "aescrypt_win";
-constexpr std::string Program_Version = "4.0.4";
+static const char *Program_Name    = "aescrypt_win";
+static const char *Program_Version = "4.0.5";
