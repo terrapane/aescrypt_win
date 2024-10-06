@@ -64,6 +64,8 @@ class WorkerThreads
         void ThreadEntry();
 
     protected:
+        void CloseThreadHandles();
+
         void StartThread(const FileList &file_list,
                          const SecureU8String &password,
                          bool encrypt);

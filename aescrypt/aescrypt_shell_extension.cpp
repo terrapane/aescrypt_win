@@ -120,7 +120,7 @@ HRESULT AESCryptShellExtension::Initialize(LPCITEMIDLIST pidlFolder,
     STGMEDIUM stg = {TYMED_HGLOBAL};
 
     // Read the list of folders
-    if (FAILED(pDO->GetData(&etc,&stg))) return E_INVALIDARG;
+    if (FAILED(pDO->GetData(&etc, &stg))) return E_INVALIDARG;
 
     // Get an HDROP handle
     HDROP hDrop = static_cast<HDROP>(GlobalLock(stg.hGlobal));
@@ -202,7 +202,7 @@ HRESULT AESCryptShellExtension::Initialize(LPCITEMIDLIST pidlFolder,
  *          Position at which the menu item is to be inserted.
  *
  *      uidFirstCmd [in]
- *          First command ID to use for custom menu additons.
+ *          First command ID to use for custom menu additions.
  *
  *      uidLastCmd [in]
  *          Last command ID available for use in menu.

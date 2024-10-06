@@ -1,5 +1,10 @@
 # Change Log
 
+v4.0.6 (Not yet published)
+
+- Various improvments / cleanup
+- Updated library dependencies
+
 v4.0.5
 
 - Removed use of constexpr for global strings used to hold the version number

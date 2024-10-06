@@ -60,6 +60,7 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance,
 __control_entrypoint(DllExport)
 STDAPI DllCanUnloadNow()
 {
+    // Ensure worker threads are not running
     if (Worker_Threads.IsBusy()) return S_FALSE;
 
     return AES_Crypt_Module.DllCanUnloadNow();

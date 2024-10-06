@@ -18,5 +18,7 @@
 
 #pragma once
 
-static const char *Program_Name    = "aescrypt_win";
-static const char *Program_Version = "4.0.5";
+#include <string>
+
+static const std::string Program_Name    = "aescrypt_win";
+static const std::string Program_Version = "4.0.6";

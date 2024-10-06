@@ -22,7 +22,6 @@
 #include <thread>
 #include <limits>
 #include <chrono>
-#include <atomic>
 #include <stdexcept>
 #include <terra/aescrypt/engine/encryptor.h>
 #include <terra/aescrypt/engine/decryptor.h>
@@ -124,6 +123,9 @@ WorkerThreads::WorkerThreads() : thread_count{0}
                        application_name.data(),
                        static_cast<int>(application_name.size()));
         application_name.resize(title_length);
+
+        // Free the library
+        FreeLibrary(hModule);
     }
     else
     {
@@ -153,13 +155,10 @@ WorkerThreads::WorkerThreads() : thread_count{0}
  */
 WorkerThreads::~WorkerThreads()
 {
-    HANDLE handle;
-
     // Wait for any active threads to complete
-    // In theory, this block of code should never run, since
-    // the IsBusy() call should be made and the class should
-    // not be destroyed.  But, just in case...
-    while(1)
+    // NOTE: This block of code should never have to wait, since the IsBusy()
+    //       call should be made and the object should not be destroyed.
+    while (true)
     {
         EnterCriticalSection(&critical_section);
         if (thread_count == 0)
@@ -171,14 +170,8 @@ WorkerThreads::~WorkerThreads()
         Sleep(200);
     }
 
-    // Release any thread handles not already released
-    while (!terminated_threads.empty())
-    {
-        handle = terminated_threads.front();
-        WaitForSingleObject(&handle, INFINITE);
-        CloseHandle(handle);
-        terminated_threads.pop_front();
-    }
+    // Close any completed thread handles
+    CloseThreadHandles();
 
     // Destroy the critical section object
     DeleteCriticalSection(&critical_section);
@@ -205,8 +198,15 @@ bool WorkerThreads::IsBusy()
 {
     bool busy = false;
 
+    // Close any completed thread handles
+    CloseThreadHandles();
+
+    // Enter the critical section
     EnterCriticalSection(&critical_section);
+
+    // If there are active threads, indicate busy
     if (thread_count > 0) busy = true;
+
     LeaveCriticalSection(&critical_section);
 
     return busy;
@@ -223,7 +223,11 @@ bool WorkerThreads::IsBusy()
  *      decryption process.
  *
  *  Parameters:
- *      None.
+ *      file_list [in]
+ *          The list of files to encrypt or decrypt.
+ *
+ *      encrypt [in]
+ *          True if encrypting, false if decrypting.
  *
  *  Returns:
  *      Nothing.
@@ -253,6 +257,52 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
 
         StartThread(file_list, password, encrypt);
     }
+}
+
+/*
+ *  WorkerThreads::CloseThreadHandles()
+ *
+ *  Description:
+ *      This function will wait on any threads that are finished to ensure
+ *      thread are completely finished and handles are closed.
+ *
+ *  Parameters:
+ *      None.
+ *
+ *  Returns:
+ *      Nothing.
+ *
+ *  Comments:
+ *      This function will enter the critical section, so ensure it is not
+ *      entered before calling this routine.
+ */
+void WorkerThreads::CloseThreadHandles()
+{
+    // Enter the critical section
+    EnterCriticalSection(&critical_section);
+
+    // Close the handles of any terminated threads
+    while (!terminated_threads.empty())
+    {
+        // Pull the thread handle from the front
+        auto thread_handle = terminated_threads.front();
+        terminated_threads.pop_front();
+
+        // Leave the critical section
+        LeaveCriticalSection(&critical_section);
+
+        // Wait for the thread to exit (should be already)
+        WaitForSingleObject(thread_handle, INFINITE);
+
+        // Close the thread handle
+        CloseHandle(thread_handle);
+
+        // Re-enter the critical section
+        EnterCriticalSection(&critical_section);
+    }
+
+    // Leave the critical section
+    LeaveCriticalSection(&critical_section);
 }
 
  /*
@@ -338,22 +388,14 @@ void WorkerThreads::StartThread(const FileList &file_list,
  */
 void WorkerThreads::ThreadEntry()
 {
+    // Close any completed thread handles
+    CloseThreadHandles();
+
     // Determine the thread ID of this thread
     DWORD thread_id = GetCurrentThreadId();
 
     // Try to enter the critical section
     EnterCriticalSection(&critical_section);
-
-    // Release any thread handles not already released
-    while (!terminated_threads.empty())
-    {
-        HANDLE handle = terminated_threads.front();
-        terminated_threads.pop_front();
-        LeaveCriticalSection(&critical_section);
-        WaitForSingleObject(&handle, INFINITE);
-        CloseHandle(handle);
-        EnterCriticalSection(&critical_section);
-    }
 
     // Locate the data to be processed
     auto it = std::find_if(requests.begin(),
@@ -363,7 +405,7 @@ void WorkerThreads::ThreadEntry()
                                return request.thread_id == thread_id;
                            });
 
-    // If unable to find the thread ID, that's a problem!
+    // If unable to find the thread ID, report the problem
     if (it == requests.end())
     {
         // Leave the critical section while reporting the issue
@@ -576,7 +618,6 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
                 ::ReportError(application_error,
                               std::wstring(L"Output file already exists: ") +
                                   out_file);
-
                 break;
             }
         }
@@ -732,12 +773,8 @@ bool WorkerThreads::EncryptStream(std::condition_variable &cv,
     Terra::AESCrypt::Engine::Encryptor encryptor;
     Terra::AESCrypt::Engine::EncryptResult encrypt_result{};
     bool encryption_complete{};
-    std::atomic<std::size_t> current_meter_position{};
+    std::size_t current_meter_position{};
     std::size_t last_meter_position{};
-
-    // Get the current time
-    std::chrono::steady_clock::time_point last_update_time =
-        std::chrono::steady_clock::now();
 
     // Define the update interval (progress bar has 100 positions)
     std::size_t update_interval = input_size / 100;
@@ -753,21 +790,11 @@ bool WorkerThreads::EncryptStream(std::condition_variable &cv,
     auto progress_updater = [&]([[maybe_unused]]const std::string &instance,
                                 std::size_t position)
     {
+        // Lock the mutex
         std::lock_guard<std::mutex> lock(mutex);
 
         // Dot not update if the input size is not known
         if (input_size == 0) return;
-
-        // Get the current time; do not update too frequently (but do update
-        // on the final position)
-        std::chrono::steady_clock::time_point current_time =
-            std::chrono::steady_clock::now();
-        if ((position == input_size) ||
-            (current_time - last_update_time < Progress_Update_Minimum))
-        {
-            return;
-        }
-        last_update_time = current_time;
 
         // Compute the percentage of file completion (aligns with the meters'
         // range of 0..100
@@ -822,10 +849,14 @@ bool WorkerThreads::EncryptStream(std::condition_variable &cv,
                            progress_dialog.WasCancelPressed();
                 });
 
+        // Get the new meter position (copying to allow unlocking mutex while
+        // operating on "current_meter_position")
+        auto new_meter_position = current_meter_position;
+
         // Service the message loop to ensure an up-to-date display
         lock.unlock();
 
-        auto new_meter_position = current_meter_position.load();
+        // Update the progress window with the new position value
         if (new_meter_position > last_meter_position)
         {
             progress_dialog.SendDlgItemMessage(
@@ -1178,12 +1209,8 @@ bool WorkerThreads::DecryptStream(std::condition_variable &cv,
     Terra::AESCrypt::Engine::Decryptor decryptor;
     Terra::AESCrypt::Engine::DecryptResult decrypt_result{};
     bool decryption_complete{};
-    std::atomic<std::size_t> current_meter_position{};
+    std::size_t current_meter_position{};
     std::size_t last_meter_position{};
-
-    // Get the current time
-    std::chrono::steady_clock::time_point last_update_time =
-        std::chrono::steady_clock::now();
 
     // Define the update interval (progress bar has 100 positions)
     std::size_t update_interval = input_size / 100;
@@ -1199,21 +1226,11 @@ bool WorkerThreads::DecryptStream(std::condition_variable &cv,
     auto progress_updater = [&]([[maybe_unused]]const std::string &instance,
                                 std::size_t position)
     {
+        // Lock the mutex
         std::lock_guard<std::mutex> lock(mutex);
 
         // Dot not update if the input size is not known
         if (input_size == 0) return;
-
-        // Get the current time; do not update too frequently (but do update
-        // on the final position)
-        std::chrono::steady_clock::time_point current_time =
-            std::chrono::steady_clock::now();
-        if ((position == input_size) ||
-            (current_time - last_update_time < Progress_Update_Minimum))
-        {
-            return;
-        }
-        last_update_time = current_time;
 
         // Compute the percentage of file completion (aligns with the meters'
         // range of 0..100
@@ -1266,10 +1283,14 @@ bool WorkerThreads::DecryptStream(std::condition_variable &cv,
                            progress_dialog.WasCancelPressed();
                 });
 
+        // Get the new meter position (copying to allow unlocking mutex while
+        // operating on "current_meter_position")
+        auto new_meter_position = current_meter_position;
+
         // Service the message loop to ensure an up-to-date display
         lock.unlock();
 
-        auto new_meter_position = current_meter_position.load();
+        // Update the progress window with the new position value
         if (new_meter_position > last_meter_position)
         {
             progress_dialog.SendDlgItemMessage(
