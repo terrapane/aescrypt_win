@@ -12,5 +12,11 @@ project(aescrypt_dependencies
         DESCRIPTION  "AES Crypt for Windows Dependencies"
         HOMEPAGE_URL "https://www.aescrypt.com")
 
+# Due to change Microsoft introduced, the MSVC runtime libraries can cause
+# a crash when using std::mutx unless the user has the latest C++ libraries
+# from Microsoft.  The following side-steps this problem. See:
+# https://developercommunity.visualstudio.com/t/Access-violation-in-_Thrd_yield-after-up/10664660#T-N10668856
+add_definitions(-D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
+
 # Include dependencies
 add_subdirectory("dependencies")
