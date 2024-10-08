@@ -16,7 +16,7 @@ project(aescrypt_dependencies
 # a crash when using std::mutx unless the user has the latest C++ libraries
 # from Microsoft.  The following side-steps this problem. See:
 # https://developercommunity.visualstudio.com/t/Access-violation-in-_Thrd_yield-after-up/10664660#T-N10668856
-add_definitions(-D_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
+add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
 
 # Include dependencies
 add_subdirectory("dependencies")
