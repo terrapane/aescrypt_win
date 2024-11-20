@@ -1,6 +1,10 @@
 # Change Log
 
-v4.0.6 (Not yet published)
+v4.1.0
+
+- Updated library dependencies
+
+v4.0.6
 
 - Various improvments / cleanup
 - Updated library dependencies

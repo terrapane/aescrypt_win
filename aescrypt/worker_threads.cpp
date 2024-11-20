@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <terra/aescrypt/engine/encryptor.h>
 #include <terra/aescrypt/engine/decryptor.h>
+#include <terra/aescrypt_lm/aescrypt_lm.h>
 #include <terra/charutil/character_utilities.h>
 #include <terra/bitutil/byte_order.h>
 #include "worker_threads.h"
@@ -252,6 +253,16 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
         {
             ::ReportError(application_error,
                           L"Password could not be converted to UTF-8");
+            return;
+        }
+
+        // Verify user license rights
+        if (!Terra::ACLM::ValidateACLM())
+        {
+            ::ReportError(application_name,
+                          L"A valid license is required to use AES Crypt. You "
+                          L"may obtain a license by visiting "
+                          L"https://www.aescrypt.com/.");
             return;
         }
 

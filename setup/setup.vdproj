@@ -81,7 +81,19 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_52506A62AED23A506B5BC99E12957E69"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_576D2C6CFC415C24F34CDAA6849290FC"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_5CDF95BB580C84609F307268EB7DDBA5"
         "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -396,6 +408,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5CDF95BB580C84609F307268EB7DDBA5"
+            {
+            "SourcePath" = "8:api-ms-win-crt-convert-l1-1-0.dll"
+            "TargetName" = "8:api-ms-win-crt-convert-l1-1-0.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_660A60A3C6744A01AAC5B8E0AB9B610E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C02056D8308F3522707030A44E852F86"
             {
             "SourcePath" = "8:VCRUNTIME140_1.dll"
@@ -593,15 +625,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AES Crypt"
-        "ProductCode" = "8:{D41182F4-4AF9-4CC3-9348-1A89CF4802E9}"
-        "PackageCode" = "8:{E93FA0A8-D4A0-46A6-8D8F-8C37E64F5B6C}"
+        "ProductCode" = "8:{25BF0525-DCDB-4E49-9833-24BBFB70CB9C}"
+        "PackageCode" = "8:{1D3A494C-6F57-4E69-AFFC-9FC6B71F5635}"
         "UpgradeCode" = "8:{92D16E60-1F16-4183-A78C-086C07CF436A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:4.0.6"
+        "ProductVersion" = "8:4.1.0"
         "Manufacturer" = "8:Terrapane Corporation"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://www.aescrypt.com/contact/"
