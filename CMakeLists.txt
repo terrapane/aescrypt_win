@@ -8,7 +8,7 @@ endif()
 
 # Define the dependencies project
 project(aescrypt_dependencies
-        VERSION 4.1.0.0
+        VERSION 4.1.1.0
         DESCRIPTION  "AES Crypt for Windows Dependencies"
         HOMEPAGE_URL "https://www.aescrypt.com")
 
