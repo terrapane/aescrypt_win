@@ -515,7 +515,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
     // Define the extensions to insert into the header
     const std::vector<std::pair<std::string, std::string>> extensions =
     {
-        {"CREATED_BY", std::string(Program_Name) + " " + Program_Version}
+        {"CREATED_BY", std::string(Project_Name) + " " + Project_Version}
     };
 
     // Create an event used to indicate the progress dialog is ready

@@ -7,13 +7,19 @@ if(POLICY CMP0141)
 endif()
 
 # Define the dependencies project
-project(aescrypt_dependencies
+project(aescrypt_win
         VERSION 4.1.1.0
         DESCRIPTION  "AES Crypt for Windows Dependencies"
         HOMEPAGE_URL "https://www.aescrypt.com")
 
+set(COPYRIGHT_TEXT "Copyright (C) 2024")
+set(AUTHOR_TEXT    "Terrapane Corporation")
+
+# Produce an output file with version information for consumption by the GUI
+configure_file(version.h.in version.h @ONLY)
+
 # Due to change Microsoft introduced, the MSVC runtime libraries can cause
-# a crash when using std::mutx unless the user has the latest C++ libraries
+# a crash when using std::mutex unless the user has the latest C++ libraries
 # from Microsoft.  The following side-steps this problem. See:
 # https://developercommunity.visualstudio.com/t/Access-violation-in-_Thrd_yield-after-up/10664660#T-N10668856
 add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
