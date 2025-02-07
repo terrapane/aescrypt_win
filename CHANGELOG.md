@@ -1,12 +1,17 @@
 # Change Log
 
+v4.2.0
+
+- No significant changes in GUI code, but there are minor changes made to
+  several dependencies
+
 v4.1.0
 
 - Updated library dependencies
 
 v4.0.6
 
-- Various improvments / cleanup
+- Various improvements / cleanup
 - Updated library dependencies
 
 v4.0.5

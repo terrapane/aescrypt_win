@@ -8,11 +8,11 @@ endif()
 
 # Define the dependencies project
 project(aescrypt_win
-        VERSION 4.1.1.0
+        VERSION 4.2.0.0
         DESCRIPTION  "AES Crypt for Windows Dependencies"
         HOMEPAGE_URL "https://www.aescrypt.com")
 
-set(COPYRIGHT_TEXT "Copyright (C) 2024")
+set(COPYRIGHT_TEXT "Copyright (C) 2025")
 set(AUTHOR_TEXT    "Terrapane Corporation")
 
 # Produce an output file with version information for consumption by the GUI
