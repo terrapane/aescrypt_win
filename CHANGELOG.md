@@ -1,5 +1,11 @@
 # Change Log
 
+v4.2.2
+
+- Fixed a bug where a directory name could be specified instead of a file name
+  in the command-line version of AES Crypt
+- Updated all library dependencies
+
 v4.2.0
 
 - No significant changes in GUI code, but there are minor changes made to
