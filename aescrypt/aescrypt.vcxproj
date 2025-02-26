@@ -378,7 +378,6 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="secure_containers.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="version.h" />
     <ClInclude Include="aescrypt.h" />
   </ItemGroup>
   <ItemGroup>
