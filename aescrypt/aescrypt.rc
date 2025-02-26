@@ -1,5 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
+#include "version.rc"
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -24,17 +25,17 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""winres.h""\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\0"
 END
@@ -48,8 +49,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,2,2,0
- PRODUCTVERSION 4,2,2,0
+ FILEVERSION VER_FILEVERSION
+ PRODUCTVERSION VER_PRODUCTVERSION
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -67,12 +68,12 @@ BEGIN
             VALUE "Comments", "AES Crypt - Advanced File Encryption for Windows"
             VALUE "CompanyName", "Terrapane Corporation"
             VALUE "FileDescription", "AES Crypt Shell Extension Library"
-            VALUE "FileVersion", "4.2.2.0"
+            VALUE "FileVersion", VER_FILEVERSION_STR
             VALUE "InternalName", "aescrypt.dll"
             VALUE "LegalCopyright", "Copyright (C) 2025"
             VALUE "OriginalFilename", "aescrypt.dll"
             VALUE "ProductName", "AES Crypt"
-            VALUE "ProductVersion", "4.2.2.0"
+            VALUE "ProductVersion", VER_PRODUCTVERSION_STR
         END
     END
     BLOCK "VarFileInfo"

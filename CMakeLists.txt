@@ -15,8 +15,9 @@ project(aescrypt_win
 set(COPYRIGHT_TEXT "Copyright (C) 2025")
 set(AUTHOR_TEXT    "Terrapane Corporation")
 
-# Produce an output file with version information for consumption by the GUI
+# Produce an output files with version information for consumption by the GUI
 configure_file(version.h.in version.h @ONLY)
+configure_file(version.rc.in version.rc @ONLY)
 
 # Due to change Microsoft introduced, the MSVC runtime libraries can cause
 # a crash when using std::mutex unless the user has the latest C++ libraries
