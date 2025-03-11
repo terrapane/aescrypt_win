@@ -11,7 +11,7 @@ endif()
 # Fetch the AES Crypt CLI repository
 FetchContent_Declare(aescrypt_cli
     GIT_REPOSITORY ${TERRAPANE_SOURCE_URI}/aescrypt_cli.git
-    GIT_TAG        v4.2.2
+    GIT_TAG        v4.2.3
     GIT_SHALLOW    true)
 
 # Install AES Crypt CLI dependencies to get libraries

@@ -1,5 +1,11 @@
 # Change Log
 
+v4.2.3
+
+- Updated to the latest command-line version
+- All binaries are now properly labeled with the version numbers, company name,
+  and digitally signed
+
 v4.2.2
 
 - Fixed a bug where a directory name could be specified instead of a file name
