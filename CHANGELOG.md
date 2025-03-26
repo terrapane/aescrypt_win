@@ -1,5 +1,14 @@
 # Change Log
 
+v4.2.4
+
+- To avoid confusion, any partial output file will be removed before presenting
+  the user with a dialog window indicating there was an error
+- Improved robustness of file closure to catch errors flushing the
+  output buffer
+- Updated CLI version to 4.2.4
+- Updated all library dependencies
+
 v4.2.3
 
 - Updated to the latest command-line version

@@ -679,24 +679,29 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
         ofs.rdbuf()->pubsetbuf(write_buffer.data(), write_buffer.size());
 
         // Encrypt the input stream
-        bool result = EncryptStream(cv,
-                                    mutex,
-                                    progress_dialog,
-                                    in_file,
-                                    password,
-                                    KDF_Iterations,
-                                    extensions,
-                                    file_size,
-                                    ifs,
-                                    ofs);
+        auto [result, error_text] = EncryptStream(cv,
+                                                  mutex,
+                                                  progress_dialog,
+                                                  in_file,
+                                                  password,
+                                                  KDF_Iterations,
+                                                  extensions,
+                                                  file_size,
+                                                  ifs,
+                                                  ofs);
 
-        // Close any open files; there may be delay in closing the output
-        // file if it is large and transmission is over a network
-        if (ifs.is_open()) ifs.close();
-        if (ofs.is_open())
+        // Close the input file
+        ifs.close();
+
+        // Close the output file; note this might take some time when
+        // flushing the buffer and sending data over a network
+        ofs.close();
+
+        // If everything else was successful, report errors for failed streams
+        if (result && ofs.fail())
         {
-            ofs.flush();
-            ofs.close();
+            result = false;
+            error_text = "Error writing to the output file";
         }
 
         // Did the encryption process fail?
@@ -714,6 +719,15 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
                     // Nothing we can do
                 }
             }
+
+            // Is there a message that should be rendered?
+            if (!error_text.empty())
+            {
+                // Report the error to the user
+                ::ReportError(application_error,
+                              std::string("Failed to encrypt: ") + error_text);
+            }
+
             break;
         }
 
@@ -768,21 +782,25 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
  *          A reference to the output stream.
  *
  *  Returns:
- *      True if successful, false if not.
+ *      A pair of values where the first is a boolean indicating success
+ *      and the second is a message that should be rendered to the user if
+ *      there was an error.  User cancellation would return false, but have
+ *      no corresponding error message.
  *
  *  Comments:
  *      None.
  */
-bool WorkerThreads::EncryptStream(std::condition_variable &cv,
-                                  std::mutex &mutex,
-                                  ProgressDialog &progress_dialog,
-                                  const std::wstring &filename,
-                                  const SecureU8String &password,
-                                  const std::uint32_t iterations,
-                                  const ExtensionList &extensions,
-                                  const std::size_t input_size,
-                                  std::istream &istream,
-                                  std::ostream &ostream) const
+std::pair<bool, std::string> WorkerThreads::EncryptStream(
+                                                std::condition_variable & cv,
+                                                std::mutex &mutex,
+                                                ProgressDialog &progress_dialog,
+                                                const std::wstring &filename,
+                                                const SecureU8String &password,
+                                                const std::uint32_t iterations,
+                                                const ExtensionList &extensions,
+                                                const std::size_t input_size,
+                                                std::istream &istream,
+                                                std::ostream &ostream) const
 {
     Terra::AESCrypt::Engine::Encryptor encryptor;
     Terra::AESCrypt::Engine::EncryptResult encrypt_result{};
@@ -900,15 +918,12 @@ bool WorkerThreads::EncryptStream(std::condition_variable &cv,
         // Convert the encryption result into a string
         oss << encrypt_result;
 
-        // Report the error to the user
-        ::ReportError(application_error,
-                      std::string("Failed to encrypt: ") + oss.str());
-
-        return false;
+        return {false, oss.str()};
     }
 
     // Return true only if encryption succeeded
-    return encrypt_result == Terra::AESCrypt::Engine::EncryptResult::Success;
+    return {encrypt_result == Terra::AESCrypt::Engine::EncryptResult::Success,
+            {}};
 }
 
 /*
@@ -1125,22 +1140,28 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         ofs.rdbuf()->pubsetbuf(write_buffer.data(), write_buffer.size());
 
         // Decrypt the input stream
-        bool result = DecryptStream(cv,
-                                    mutex,
-                                    progress_dialog,
-                                    in_file,
-                                    password,
-                                    file_size,
-                                    ifs,
-                                    ofs);
+        auto [result, error_text] = DecryptStream(cv,
+                                                  mutex,
+                                                  progress_dialog,
+                                                  in_file,
+                                                  password,
+                                                  file_size,
+                                                  ifs,
+                                                  ofs);
 
-        // Close any open files; there may be delay in closing the output
-        // file if it is large and transmission is over a network
-        if (ifs.is_open()) ifs.close();
-        if (ofs.is_open())
+
+        // Close the input file
+        ifs.close();
+
+        // Close the output file; note this might take some time when
+        // flushing the buffer and sending data over a network
+        ofs.close();
+
+        // If everything else was successful, report errors for failed streams
+        if (result && ofs.fail())
         {
-            ofs.flush();
-            ofs.close();
+            result = false;
+            error_text = "Error writing to the output file";
         }
 
         // Did the decryption process fail?
@@ -1158,6 +1179,15 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
                     // Nothing we can do
                 }
             }
+
+            // Is there a message that should be rendered?
+            if (!error_text.empty())
+            {
+                // Report the error to the user
+                ::ReportError(application_error,
+                              std::string("Failed to decrypt: ") + error_text);
+            }
+
             break;
         }
 
@@ -1206,19 +1236,23 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
  *          A reference to the output stream.
  *
  *  Returns:
- *      True if successful, false if not.
+ *      A pair of values where the first is a boolean indicating success
+ *      and the second is a message that should be rendered to the user if
+ *      there was an error.  User cancellation would return false, but have
+ *      no corresponding error message.
  *
  *  Comments:
  *      None.
  */
-bool WorkerThreads::DecryptStream(std::condition_variable &cv,
-                                  std::mutex &mutex,
-                                  ProgressDialog &progress_dialog,
-                                  const std::wstring &filename,
-                                  const SecureU8String &password,
-                                  const std::size_t input_size,
-                                  std::istream &istream,
-                                  std::ostream &ostream) const
+std::pair<bool, std::string> WorkerThreads::DecryptStream(
+                                                std::condition_variable &cv,
+                                                std::mutex &mutex,
+                                                ProgressDialog &progress_dialog,
+                                                const std::wstring &filename,
+                                                const SecureU8String &password,
+                                                const std::size_t input_size,
+                                                std::istream &istream,
+                                                std::ostream &ostream) const
 {
     Terra::AESCrypt::Engine::Decryptor decryptor;
     Terra::AESCrypt::Engine::DecryptResult decrypt_result{};
@@ -1334,15 +1368,12 @@ bool WorkerThreads::DecryptStream(std::condition_variable &cv,
         // Convert the decryption result into a string
         oss << decrypt_result;
 
-        // Report the error to the user
-        ::ReportError(application_error,
-                      std::string("Failed to decrypt: ") + oss.str());
-
-        return false;
+        return {false, oss.str()};
     }
 
     // Return true only if decryption succeeded
-    return decrypt_result == Terra::AESCrypt::Engine::DecryptResult::Success;
+    return {decrypt_result == Terra::AESCrypt::Engine::DecryptResult::Success,
+            {}};
 }
 
 /*

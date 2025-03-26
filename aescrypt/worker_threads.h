@@ -76,25 +76,27 @@ class WorkerThreads
         void DecryptFiles(const FileList &file_list,
                           const SecureU8String &password);
 
-        bool EncryptStream(std::condition_variable &cv,
-                           std::mutex &mutex,
-                           ProgressDialog &progress_dialog,
-                           const std::wstring &filename,
-                           const SecureU8String &password,
-                           const std::uint32_t iterations,
-                           const ExtensionList &extensions,
-                           const std::size_t input_size,
-                           std::istream &istream,
-                           std::ostream &ostream) const;
+        std::pair<bool, std::string> EncryptStream(
+            std::condition_variable &cv,
+            std::mutex &mutex,
+            ProgressDialog &progress_dialog,
+            const std::wstring &filename,
+            const SecureU8String &password,
+            const std::uint32_t iterations,
+            const ExtensionList &extensions,
+            const std::size_t input_size,
+            std::istream &istream,
+            std::ostream &ostream) const;
 
-        bool DecryptStream(std::condition_variable &cv,
-                           std::mutex &mutex,
-                           ProgressDialog &progress_dialog,
-                           const std::wstring &filename,
-                           const SecureU8String &password,
-                           const std::size_t input_size,
-                           std::istream &istream,
-                           std::ostream &ostream) const;
+        std::pair<bool, std::string> DecryptStream(
+            std::condition_variable &cv,
+            std::mutex &mutex,
+            ProgressDialog &progress_dialog,
+            const std::wstring &filename,
+            const SecureU8String &password,
+            const std::size_t input_size,
+            std::istream &istream,
+            std::ostream &ostream) const;
 
         void WindowsMessageLoop();
 
