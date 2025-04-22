@@ -1,5 +1,9 @@
 # Change Log
 
+v4.3.0
+
+- Updates to core libraries, including performance improvements to libaes
+
 v4.2.4
 
 - To avoid confusion, any partial output file will be removed before presenting
