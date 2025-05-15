@@ -240,6 +240,16 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
 {
     PasswdDialog password_dialog(application_name);
 
+    // Verify user license rights
+    if (!Terra::ACLM::ValidateACLM())
+    {
+        ::ReportError(application_name,
+                      L"A valid license is required to use AES Crypt. You "
+                      L"may obtain a license by visiting "
+                      L"https://www.aescrypt.com/.");
+        return;
+    }
+
     // Prompt the user for a password
     if (password_dialog.DoModal(::GetActiveWindow(), (encrypt ? 1 : 0)) == IDOK)
     {
@@ -253,16 +263,6 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
         {
             ::ReportError(application_error,
                           L"Password could not be converted to UTF-8");
-            return;
-        }
-
-        // Verify user license rights
-        if (!Terra::ACLM::ValidateACLM())
-        {
-            ::ReportError(application_name,
-                          L"A valid license is required to use AES Crypt. You "
-                          L"may obtain a license by visiting "
-                          L"https://www.aescrypt.com/.");
             return;
         }
 
