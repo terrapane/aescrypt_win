@@ -3,6 +3,7 @@
 v4.3.0
 
 - Updates to core libraries, including performance improvements to libaes
+- Improved messages for warnings / errors
 
 v4.2.4
 
