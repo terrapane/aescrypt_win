@@ -196,5 +196,8 @@ void ReportError(const std::wstring &window_title,
         }
     }
 
-    ::MessageBox(NULL, reported_message.c_str(), window_title.c_str(), MB_OK);
+    ::MessageBox(NULL,
+                 reported_message.c_str(),
+                 window_title.c_str(),
+                 MB_OK | MB_ICONERROR);
 }

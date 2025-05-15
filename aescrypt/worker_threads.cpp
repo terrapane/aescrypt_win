@@ -243,10 +243,20 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
     // Verify user license rights
     if (!Terra::ACLM::ValidateACLM())
     {
-        ::ReportError(application_name,
-                      L"A valid license is required to use AES Crypt. You "
-                      L"may obtain a license by visiting "
-                      L"https://www.aescrypt.com/.");
+        if (MessageBox(NULL,
+                       L"A valid license is required to use AES Crypt. You "
+                       L"may obtain a license by visiting "
+                       L"https://www.aescrypt.com/. Visit now?",
+                       application_name.c_str(),
+                       MB_YESNO | MB_ICONQUESTION) == IDYES)
+        {
+            ShellExecute(NULL,
+                         L"open",
+                         L"https://www.aescrypt.com/",
+                         NULL,
+                         NULL,
+                         SW_SHOWNORMAL);
+        }
         return;
     }
 

@@ -207,16 +207,16 @@ LRESULT PasswdDialog::OnClickedOK(WORD wNotifyCode,
             MessageBox(L"Password confirmation check failed.\nVerify that the "
                        L"passwords match.",
                        window_title.c_str(),
-                       MB_OK);
+                       MB_OK | MB_ICONWARNING);
             return 0;
         }
 
         // Ensure we got a password
         if (password.empty())
         {
-            MessageBox(L"You failed to enter a password.",
+            MessageBox(L"A password was not entered.",
                        window_title.c_str(),
-                       MB_OK);
+                       MB_OK | MB_ICONWARNING);
             return 0;
         }
 
@@ -229,9 +229,9 @@ LRESULT PasswdDialog::OnClickedOK(WORD wNotifyCode,
     // Ensure we got a password for decrypting
     if (password.empty())
     {
-        MessageBox(L"You failed to enter a password.",
+        MessageBox(L"A password was not entered.",
                    window_title.c_str(),
-                   MB_OK);
+                   MB_OK | MB_ICONWARNING);
         return 0;
     }
 
