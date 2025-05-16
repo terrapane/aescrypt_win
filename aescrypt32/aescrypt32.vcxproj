@@ -106,7 +106,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\out\build;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\out\build\$(Platform)-$(Configuration);</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -135,7 +135,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\out\build;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\out\build\$(Platform)-$(Configuration);</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -161,7 +161,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\out\build;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\out\build\$(Platform)-$(Configuration);</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -190,7 +190,7 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\out\build;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\out\build\$(Platform)-$(Configuration);</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
