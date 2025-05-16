@@ -21,14 +21,21 @@
     {
       "name": "x64-release",
       "displayName": "x64 Release",
-      "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
-      "inherits": "x64-debug",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "description": "Target Windows (64-bit) with the Visual Studio development environment.",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_DEBUG_POSTFIX": ""
+      }
     },
     {
       "name": "x64-debug",
       "displayName": "x64 Debug",
-      "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
+      "description": "Target Windows (64-bit) with the Visual Studio development environment.",
       "inherits": "windows-base",
       "architecture": {
         "value": "x64",
@@ -39,14 +46,21 @@
     {
       "name": "x86-release",
       "displayName": "x86 Release",
-      "description": "Target Windows (32-bit) with the Visual Studio development environment. (RelWithDebInfo)",
-      "inherits": "x86-debug",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "description": "Target Windows (32-bit) with the Visual Studio development environment.",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_DEBUG_POSTFIX": ""
+      }
     },
     {
       "name": "x86-debug",
       "displayName": "x86 Debug",
-      "description": "Target Windows (32-bit) with the Visual Studio development environment. (Debug)",
+      "description": "Target Windows (32-bit) with the Visual Studio development environment.",
       "inherits": "windows-base",
       "architecture": {
         "value": "x86",
