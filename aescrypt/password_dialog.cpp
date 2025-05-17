@@ -162,9 +162,9 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
  *  Comments:
  *      None.
  */
-LRESULT PasswdDialog::OnClickedOK(WORD wNotifyCode,
+LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
                                   WORD wID,
-                                  HWND hWndCtl,
+                                  [[maybe_unused]] HWND hWndCtl,
                                   BOOL &bHandled)
 {
     bHandled = TRUE;
@@ -267,9 +267,9 @@ LRESULT PasswdDialog::OnClickedOK(WORD wNotifyCode,
  *  Comments:
  *      None.
  */
-LRESULT PasswdDialog::OnClickedCancel(WORD wNotifyCode,
+LRESULT PasswdDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
                                       WORD wID,
-                                      HWND hWndCtl,
+                                      [[maybe_unused]] HWND hWndCtl,
                                       BOOL &bHandled)
 {
     bHandled = TRUE;

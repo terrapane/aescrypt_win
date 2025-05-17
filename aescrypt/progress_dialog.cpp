@@ -182,9 +182,9 @@ LRESULT ProgressDialog::OnInitDialog(UINT uMsg,
  *  Comments:
  *      None.
  */
-LRESULT ProgressDialog::OnQueryEndSession(UINT uMsg,
-                                          WPARAM wParam,
-                                          LPARAM lParam,
+LRESULT ProgressDialog::OnQueryEndSession([[maybe_unused]] UINT uMsg,
+                                          [[maybe_unused]] WPARAM wParam,
+                                          [[maybe_unused]] LPARAM lParam,
                                           BOOL &bHandled)
 {
     // Indicate that the message was handled
@@ -221,9 +221,9 @@ LRESULT ProgressDialog::OnQueryEndSession(UINT uMsg,
  *  Comments:
  *      None.
  */
-LRESULT ProgressDialog::OnEndSession(UINT uMsg,
+LRESULT ProgressDialog::OnEndSession([[maybe_unused]] UINT uMsg,
                                      WPARAM wParam,
-                                     LPARAM lParam,
+                                     [[maybe_unused]] LPARAM lParam,
                                      BOOL &bHandled)
 {
     // Indicate that the message was handled
@@ -268,9 +268,9 @@ LRESULT ProgressDialog::OnEndSession(UINT uMsg,
  *  Comments:
  *      None.
  */
-LRESULT ProgressDialog::OnClickedCancel(WORD wNotifyCode,
-                                        WORD wID,
-                                        HWND hWndCtl,
+LRESULT ProgressDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
+                                        [[maybe_unused]] WORD wID,
+                                        [[maybe_unused]] HWND hWndCtl,
                                         BOOL &bHandled)
 {
     // Indicate that the message was handled

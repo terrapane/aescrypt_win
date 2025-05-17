@@ -45,7 +45,7 @@ WorkerThreads Worker_Threads;
 #endif
 
 // DLL Entry Point
-extern "C" BOOL WINAPI DllMain(HINSTANCE hInstance,
+extern "C" BOOL WINAPI DllMain([[maybe_unused]] HINSTANCE hInstance,
                                DWORD dwReason,
                                LPVOID lpReserved)
 {

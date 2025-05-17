@@ -692,7 +692,6 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
         auto [result, error_text] = EncryptStream(cv,
                                                   mutex,
                                                   progress_dialog,
-                                                  in_file,
                                                   password,
                                                   KDF_Iterations,
                                                   extensions,
@@ -770,9 +769,6 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
  *      progress_dialog [in]
  *          A reference to the progress dialog that shows encryption progress.
  *
- *      filename [in]
- *          The name of the file to encrypt.
- *
  *      password [in]
  *          The password (in UTF-16 format) to use for encryption.
  *
@@ -804,7 +800,6 @@ std::pair<bool, std::string> WorkerThreads::EncryptStream(
                                                 std::condition_variable & cv,
                                                 std::mutex &mutex,
                                                 ProgressDialog &progress_dialog,
-                                                const std::wstring &filename,
                                                 const SecureU8String &password,
                                                 const std::uint32_t iterations,
                                                 const ExtensionList &extensions,
@@ -1153,7 +1148,6 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         auto [result, error_text] = DecryptStream(cv,
                                                   mutex,
                                                   progress_dialog,
-                                                  in_file,
                                                   password,
                                                   file_size,
                                                   ifs,
@@ -1230,9 +1224,6 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
  *      progress_dialog [in]
  *          A reference to the progress dialog that shows decryption progress.
  *
- *      filename [in]
- *          The name of the file to decrypt.
- *
  *      password [in]
  *          The password (in UTF-16 format) to use for decryption.
  *
@@ -1258,7 +1249,6 @@ std::pair<bool, std::string> WorkerThreads::DecryptStream(
                                                 std::condition_variable &cv,
                                                 std::mutex &mutex,
                                                 ProgressDialog &progress_dialog,
-                                                const std::wstring &filename,
                                                 const SecureU8String &password,
                                                 const std::size_t input_size,
                                                 std::istream &istream,

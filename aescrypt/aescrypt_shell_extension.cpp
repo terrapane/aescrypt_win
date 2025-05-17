@@ -112,9 +112,10 @@ AESCryptShellExtension::~AESCryptShellExtension()
  *  Comments:
  *      None.
  */
-HRESULT AESCryptShellExtension::Initialize(LPCITEMIDLIST pidlFolder,
-                                           LPDATAOBJECT pDO,
-                                           HKEY hProgID)
+HRESULT AESCryptShellExtension::Initialize(
+                                    [[maybe_unused]] LPCITEMIDLIST pidlFolder,
+                                    LPDATAOBJECT pDO,
+                                    [[maybe_unused]] HKEY hProgID)
 {
     FORMATETC etc = {CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
     STGMEDIUM stg = {TYMED_HGLOBAL};
@@ -219,7 +220,7 @@ HRESULT AESCryptShellExtension::Initialize(LPCITEMIDLIST pidlFolder,
 HRESULT AESCryptShellExtension::QueryContextMenu(HMENU hMenu,
                                                  UINT uMenuIndex,
                                                  UINT uidFirstCmd,
-                                                 UINT uidLastCmd,
+                                                 [[maybe_unused]] UINT uidLastCmd,
                                                  UINT uFlags)
 {
     // If the flags include CMF_DEFAULTONLY, do nothing
@@ -301,7 +302,7 @@ HRESULT AESCryptShellExtension::GetCommandString(UINT_PTR idCmd,
 HRESULT AESCryptShellExtension::GetCommandString(UINT idCmd,
 #endif
                                                  UINT uType,
-                                                 UINT* puReserved,
+                                                 [[maybe_unused]] UINT* puReserved,
                                                  LPSTR szName,
                                                  UINT cchMax)
 {
