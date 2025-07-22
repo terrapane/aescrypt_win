@@ -118,6 +118,9 @@ HRESULT AESCryptShellExtension::Initialize(
                                     LPDATAOBJECT pDO,
                                     [[maybe_unused]] HKEY hProgID)
 {
+    // Clear the file list (paranoia)
+    file_list.clear();
+
     // If pDO is NULL, just return
     if (!pDO) return E_INVALIDARG;
 
@@ -134,9 +137,6 @@ HRESULT AESCryptShellExtension::Initialize(
         ReleaseStgMedium(&stg);
         return E_INVALIDARG;
     }
-
-    // Clear the file list (paranoia)
-    file_list.clear();
 
     // Initialize the variables that indicate the type of files we have
     aes_files = false;
