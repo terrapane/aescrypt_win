@@ -24,6 +24,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <commctrl.h>
+#include <atlcomcli.h>
 #include "aescrypt.h"
 #include "aescrypt_shell_extension.h"
 #include "worker_threads.h"
@@ -121,53 +122,108 @@ HRESULT AESCryptShellExtension::Initialize(
     // Clear the file list (paranoia)
     file_list.clear();
 
-    // If pDO is NULL, just return
-    if (!pDO) return E_INVALIDARG;
-
-    FORMATETC etc = {CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
-    STGMEDIUM stg = {TYMED_HGLOBAL};
-
-    // Read the list of folders
-    if (FAILED(pDO->GetData(&etc, &stg))) return E_INVALIDARG;
-
-    // Get an HDROP handle
-    HDROP hDrop = static_cast<HDROP>(GlobalLock(stg.hGlobal));
-    if (hDrop == NULL)
-    {
-        ReleaseStgMedium(&stg);
-        return E_INVALIDARG;
-    }
-
     // Initialize the variables that indicate the type of files we have
     aes_files = false;
     non_aes_files = false;
 
-    // Get a count of the number of files
-    UINT file_count = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
+    // If pDO is NULL, just return
+    if (!pDO) return E_INVALIDARG;
 
-    // Iterate over the list of files
-    for (UINT i = 0; i < file_count; i++)
+    // Attempt to use SHCreateShellItemArrayFromDataObject
+    ATL::CComPtr<IShellItemArray> pItemArray;
+    HRESULT hr =
+        SHCreateShellItemArrayFromDataObject(pDO, IID_PPV_ARGS(&pItemArray));
+    if (SUCCEEDED(hr) && pItemArray)
     {
-        // Determine the length of the filename
-        UINT filename_length = DragQueryFile(hDrop, i, nullptr, 0);
-        if (filename_length == 0) continue;
+        DWORD count;
+        hr = pItemArray->GetCount(&count);
+        if (FAILED(hr)) return hr;
 
-        std::vector<wchar_t> filename_buffer(filename_length + 1);
-
-        // Try to retrieve a filename associated with this invocation
-        if (!DragQueryFile(hDrop,
-                           i,
-                           filename_buffer.data(),
-                           filename_length + 1))
+        for (DWORD i = 0; i < count; i++)
         {
-            continue;
+            ATL::CComPtr<IShellItem> pItem;
+            hr = pItemArray->GetItemAt(i, &pItem);
+            if (SUCCEEDED(hr))
+            {
+                ATL::CComHeapPtr<WCHAR> pszName;
+                hr = pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszName);
+                if (SUCCEEDED(hr))
+                {
+                    // Create a std::wstring to hold the filename
+                    std::wstring filename(pszName);
+
+                    file_list.emplace_back(std::move(filename));
+                }
+                else
+                {
+                    // Try alternative name for cloud files
+                    hr = pItem->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING,
+                                               &pszName);
+                    if (SUCCEEDED(hr))
+                    {
+                        // Create a std::wstring to hold the filename
+                        std::wstring filename(pszName);
+
+                        file_list.emplace_back(std::move(filename));
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        // Fall back to using HDROP
+        FORMATETC etc = {CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
+        STGMEDIUM stg = {TYMED_HGLOBAL};
+
+        // Read the list of folders
+        if (FAILED(pDO->GetData(&etc, &stg))) return E_INVALIDARG;
+
+        // Get an HDROP handle
+        HDROP hDrop = static_cast<HDROP>(GlobalLock(stg.hGlobal));
+        if (hDrop == NULL)
+        {
+            ReleaseStgMedium(&stg);
+            return E_INVALIDARG;
         }
 
-        // Create a std::wstring to hold the filename
-        std::wstring filename(
-            filename_buffer.data(),
-            wcsnlen(filename_buffer.data(), filename_buffer.size()));
+        // Get a count of the number of files
+        UINT file_count = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
 
+        // Iterate over the list of files
+        for (UINT i = 0; i < file_count; i++)
+        {
+            // Determine the length of the filename
+            UINT filename_length = DragQueryFile(hDrop, i, nullptr, 0);
+            if (filename_length == 0) continue;
+
+            std::vector<wchar_t> filename_buffer(filename_length + 1);
+
+            // Try to retrieve a filename associated with this invocation
+            if (!DragQueryFile(hDrop,
+                               i,
+                               filename_buffer.data(),
+                               filename_length + 1))
+            {
+                continue;
+            }
+
+            // Create a std::wstring to hold the filename
+            std::wstring filename(
+                filename_buffer.data(),
+                wcsnlen(filename_buffer.data(), filename_buffer.size()));
+
+            file_list.emplace_back(std::move(filename));
+        }
+
+        // Release resources
+        GlobalUnlock(stg.hGlobal);
+        ReleaseStgMedium(&stg);
+    }
+
+    // All of the files must be either AES or non-AES files; figure this out
+    for (const auto &filename : file_list)
+    {
         // Determine if this is a .aes file or not
         if (HasAESExtension(filename))
         {
@@ -183,16 +239,14 @@ HRESULT AESCryptShellExtension::Initialize(
             // Do not allow mixing of file types
             if (aes_files) break;
         }
-
-        file_list.emplace_back(std::move(filename));
     }
 
-    // Release resources
-    GlobalUnlock(stg.hGlobal);
-    ReleaseStgMedium(&stg);
-
     // Do not show the menu if both a mix of .aes and non-.aes files seen
-    if (aes_files && non_aes_files) return E_INVALIDARG;
+    if (aes_files && non_aes_files)
+    {
+        file_list.clear();
+        return E_INVALIDARG;
+    }
 
     // If there are no files in the list, do not render a menu
     if (file_list.empty()) return E_INVALIDARG;

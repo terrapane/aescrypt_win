@@ -154,7 +154,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
 
     // Sit in a loop waiting for the AES Crypt Library to indicate it is no
     // longer busy and message processing completes on WM_DESTROY.
-    while(true)
+    while (true)
     {
         if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
         {
