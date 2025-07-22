@@ -194,6 +194,9 @@
     <PostBuildEvent>
       <Command>xcopy /Y "$(SolutionDir)out\install\$(Platform)-$(Configuration)\bin\aescrypt.exe" "$(SolutionDir)out\install\"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>long_path.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -291,6 +294,9 @@
     <PostBuildEvent>
       <Command>xcopy /Y "$(SolutionDir)out\install\$(Platform)-$(Configuration)\bin\aescrypt.exe" "$(SolutionDir)out\install\"</Command>
     </PostBuildEvent>
+    <Manifest>
+      <AdditionalManifestFiles>long_path.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Template|x64'">
     <ClCompile>
