@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
+#include <array>
 #include <filesystem>
 #include <algorithm>
 #include <commctrl.h>
@@ -144,17 +145,17 @@ HRESULT AESCryptShellExtension::Initialize(
     // Iterate over the list of files
     for (UINT i = 0; i < file_count; i++)
     {
-        std::wstring filename;
-        wchar_t filename_buffer[MAX_PATH];
+        std::array<wchar_t, MAX_PATH> filename_buffer;
 
         // Try to retrieve a filename associated with this invocation
-        if (!DragQueryFile(hDrop, i, filename_buffer, MAX_PATH)) continue;
+        if (!DragQueryFile(hDrop, i, filename_buffer.data(), MAX_PATH))
+        {
+            continue;
+        }
 
-        // Get the file name length and copy it into a std::wstring
-        size_t filename_length = _tcsnlen(filename_buffer, MAX_PATH);
-        std::copy(filename_buffer,
-                  filename_buffer + filename_length,
-                  std::back_inserter(filename));
+        // Create a std::wstring to hold the filename
+        std::wstring filename(filename_buffer.data(),
+                              _tcsnlen(filename_buffer.data(), MAX_PATH));
 
         // Determine if this is a .aes file or not
         if (HasAESExtension(filename))
