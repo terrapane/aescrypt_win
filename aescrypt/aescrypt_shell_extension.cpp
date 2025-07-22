@@ -20,7 +20,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
-#include <array>
+#include <vector>
 #include <filesystem>
 #include <algorithm>
 #include <commctrl.h>
@@ -118,6 +118,9 @@ HRESULT AESCryptShellExtension::Initialize(
                                     LPDATAOBJECT pDO,
                                     [[maybe_unused]] HKEY hProgID)
 {
+    // If pDO is NULL, just return
+    if (!pDO) return E_INVALIDARG;
+
     FORMATETC etc = {CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL};
     STGMEDIUM stg = {TYMED_HGLOBAL};
 
@@ -145,17 +148,25 @@ HRESULT AESCryptShellExtension::Initialize(
     // Iterate over the list of files
     for (UINT i = 0; i < file_count; i++)
     {
-        std::array<wchar_t, MAX_PATH> filename_buffer;
+        // Determine the length of the filename
+        UINT filename_length = DragQueryFile(hDrop, i, nullptr, 0);
+        if (filename_length == 0) continue;
+
+        std::vector<wchar_t> filename_buffer(filename_length + 1);
 
         // Try to retrieve a filename associated with this invocation
-        if (!DragQueryFile(hDrop, i, filename_buffer.data(), MAX_PATH))
+        if (!DragQueryFile(hDrop,
+                           i,
+                           filename_buffer.data(),
+                           filename_length + 1))
         {
             continue;
         }
 
         // Create a std::wstring to hold the filename
-        std::wstring filename(filename_buffer.data(),
-                              _tcsnlen(filename_buffer.data(), MAX_PATH));
+        std::wstring filename(
+            filename_buffer.data(),
+            wcsnlen(filename_buffer.data(), filename_buffer.size()));
 
         // Determine if this is a .aes file or not
         if (HasAESExtension(filename))
