@@ -626,7 +626,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AES Crypt"
         "ProductCode" = "8:{AEA1B052-7833-4AE6-9350-1888D1475273}"
-        "PackageCode" = "8:{606F331C-6E89-49E5-AF75-1FC68E36C954}"
+        "PackageCode" = "8:{A5F7BFC3-97A5-486F-B38B-ED8FE17100E7}"
         "UpgradeCode" = "8:{92D16E60-1F16-4183-A78C-086C07CF436A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -649,7 +649,7 @@
         "UseSystemSearchPath" = "11:TRUE"
         "TargetPlatform" = "3:1"
         "PreBuildEvent" = "8:"
-        "PostBuildEvent" = "8:@echo off\r\nfor /f \"tokens=2 delims==\" %%A in ('findstr /C:\"ProductVersion\" \"$(ProjectDir)setup.vdproj\" ^| findstr /V \"PostBuildEvent\"') do set \"version=%%A\"\r\nset \"version=%version:8:=%\"\r\nset \"version=%version:\"=%\"\r\nset \"version=%version: =%\"\r\nset \"version=%version:.=_%\"\r\necho Renaming aescrypt_gui.msi to aescrypt_gui-%version%.msi\r\nrename \"$(ProjectDir)$(Configuration)\\aescrypt_gui.msi\" \"aescrypt_gui-%version%.msi\""
+        "PostBuildEvent" = "8:@echo off\r\nfor /f \"tokens=2 delims==\" %%A in ('findstr /C:\"ProductVersion\" \"$(ProjectDir)setup.vdproj\" ^| findstr /V \"PostBuildEvent\"') do set \"version=%%A\"\r\nset \"version=%version:8:=%\"\r\nset \"version=%version:\"=%\"\r\nset \"version=%version: =%\"\r\necho Renaming aescrypt_gui.msi to aescrypt_gui-%version%.msi\r\nrename \"$(ProjectDir)$(Configuration)\\aescrypt_gui.msi\" \"aescrypt_gui-%version%.msi\""
         "RunPostBuildEvent" = "3:0"
         }
         "Registry"
