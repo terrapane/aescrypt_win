@@ -58,9 +58,9 @@ PasswdDialog::PasswdDialog(const std::wstring &window_title) :
                                      LR_DEFAULTCOLOR | LR_DEFAULTSIZE));
 
 
-    // Load icons that are 24x24 or larger to facilitate scaling
-    int cxIcon = std::max(GetSystemMetrics(SM_CXSMICON), 24);
-    int cyIcon = std::max(GetSystemMetrics(SM_CYSMICON), 24);
+    // Load icons that are 16x16 or larger to facilitate scaling
+    int cxIcon = std::max(GetSystemMetrics(SM_CXSMICON), 16);
+    int cyIcon = std::max(GetSystemMetrics(SM_CYSMICON), 16);
 
     // Load the "visible" eye icon to use when the user wishes to show passwords
     hIconEyeVisible =
