@@ -1,5 +1,16 @@
 # Change Log
 
+v4.4.0 (In Progress)
+
+- Made it possible to toggle visibility of passwords typed
+- Introduction of a manifest to allow the shell extension to use longer names
+- Changed Win32 API used for receiving a file list from the Windows shell
+- Removed some legacy C arrays
+
+v4.3.1
+
+- Updated dependencies
+
 v4.3.0
 
 - Updates to core libraries, including performance improvements to libaes
