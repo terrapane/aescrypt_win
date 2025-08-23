@@ -79,7 +79,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         wndclass.cbWndExtra     = 0;
         wndclass.hInstance      = hInstance;
         wndclass.hIcon          = LoadIcon(hInstance,
-                                           MAKEINTRESOURCE(IDI_AESCRYPT32));
+                                           MAKEINTRESOURCE(IDI_AESCRYPT_LOCK));
         wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
         wndclass.hbrBackground  = static_cast<HBRUSH>(
                                                 GetStockObject(WHITE_BRUSH));

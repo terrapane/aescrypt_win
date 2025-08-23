@@ -1,6 +1,5 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "version.rc"
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
@@ -8,6 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
+#include "version.rc"
 #include "winres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -30,8 +30,9 @@ BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUD
 BEGIN
+    "#include ""version.rc""\r\n"
     "#include ""winres.h""\0"
 END
 
@@ -90,7 +91,7 @@ END
 
 IDR_AESCRYPT            REGISTRY                "aescrypt.rgs"
 
-IDR_AESCRYPTSHELLEXTENSION REGISTRY                "aescrypt_shell_extension.rgs"
+IDR_AESCRYPTSHELLEXTENSION REGISTRY             "aescrypt_shell_extension.rgs"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -108,9 +109,13 @@ IDB_CTXBITMAP           BITMAP                  "ctxbitmap.bmp"
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_AESCRYPT            ICON                    "aescrypt_document.ico"
+IDI_AESCRYPT_DOCUMENT   ICON                    "aescrypt_document.ico"
 
-IDI_LOCK                ICON                    "aescrypt_lock.ico"
+IDI_AESCRYPT_LOCK       ICON                    "aescrypt_lock.ico"
+
+IDI_EYE_VISIBLE         ICON                    "eye_visible.ico"
+
+IDI_EYE_HIDDEN          ICON                    "eye_hidden.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -118,7 +123,7 @@ IDI_LOCK                ICON                    "aescrypt_lock.ico"
 // Dialog
 //
 
-IDD_PASSWDDIALOG DIALOGEX 0, 0, 279, 68
+IDD_PASSWDDIALOG DIALOGEX 0, 0, 296, 68
 STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "AES Crypt Password"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
@@ -127,17 +132,18 @@ BEGIN
     EDITTEXT        IDC_PASSWD,6,18,208,14,ES_PASSWORD | ES_AUTOHSCROLL
     LTEXT           "Confirm password:",IDC_ENTERPASSWDCONFIRM,7,36,207,8
     EDITTEXT        IDC_PASSWDCONFIRM,6,47,208,14,ES_PASSWORD | ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,222,17,50,16
-    PUSHBUTTON      "Cancel",IDCANCEL,222,36,50,16
+    ICON            "",IDC_SHOWPASSWORD,218,17,19,18,SS_NOTIFY | SS_CENTERIMAGE
+    DEFPUSHBUTTON   "OK",IDOK,240,17,50,16
+    PUSHBUTTON      "Cancel",IDCANCEL,240,36,50,16
 END
 
-IDD_PROGRESSDIALOG DIALOGEX 0, 0, 279, 87
+IDD_PROGRESSDIALOG DIALOGEX 0, 0, 280, 87
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "AES Crypt Progress"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    PUSHBUTTON      "Cancel",IDCANCEL,222,64,50,16
+    PUSHBUTTON      "Cancel",IDCANCEL,223,65,50,16
     CONTROL         "",IDC_PROGRESSBAR,"msctls_progress32",WS_BORDER,7,48,265,10
     LTEXT           "",IDC_ENCRYPTINGMSG,7,7,265,8
     LTEXT           "",IDC_FILENAME,7,16,265,25,SS_PATHELLIPSIS
@@ -155,7 +161,7 @@ BEGIN
     IDD_PASSWDDIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 6
-        RIGHTMARGIN, 272
+        RIGHTMARGIN, 289
         TOPMARGIN, 7
         BOTTOMMARGIN, 61
     END
@@ -163,7 +169,7 @@ BEGIN
     IDD_PROGRESSDIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 272
+        RIGHTMARGIN, 273
         TOPMARGIN, 7
         BOTTOMMARGIN, 80
     END
@@ -207,7 +213,6 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

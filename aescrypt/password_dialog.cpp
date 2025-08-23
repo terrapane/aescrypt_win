@@ -41,17 +41,44 @@
 PasswdDialog::PasswdDialog(const std::wstring &window_title) :
     ATL::CAxDialogImpl<PasswdDialog>(),
     window_title{window_title},
+    password_char{'*'},
     encrypting{false},
-    hIcon{}
+    show_password{false},
+    hIconLock{},
+    hIconEyeVisible{},
+    hIconEyeHidden{}
 {
     // Load the icon to show on the system menu
-    hIcon =
+    hIconLock =
         static_cast<HICON>(LoadImage(ATL::_AtlBaseModule.GetResourceInstance(),
-                                     MAKEINTRESOURCEW(IDI_LOCK),
+                                     MAKEINTRESOURCEW(IDI_AESCRYPT_LOCK),
                                      IMAGE_ICON,
                                      0,
                                      0,
                                      LR_DEFAULTCOLOR | LR_DEFAULTSIZE));
+
+
+    // Load icons that are 24x24 or larger to facilitate scaling
+    int cxIcon = std::max(GetSystemMetrics(SM_CXSMICON), 24);
+    int cyIcon = std::max(GetSystemMetrics(SM_CYSMICON), 24);
+
+    // Load the "visible" eye icon to use when the user wishes to show passwords
+    hIconEyeVisible =
+        static_cast<HICON>(LoadImage(ATL::_AtlBaseModule.GetResourceInstance(),
+                                     MAKEINTRESOURCEW(IDI_EYE_VISIBLE),
+                                     IMAGE_ICON,
+                                     cxIcon,
+                                     cyIcon,
+                                     LR_DEFAULTCOLOR));
+
+    // Load the "hidden" eye icon to use when the user wishes to hide passwords
+    hIconEyeHidden =
+        static_cast<HICON>(LoadImage(ATL::_AtlBaseModule.GetResourceInstance(),
+                                     MAKEINTRESOURCEW(IDI_EYE_HIDDEN),
+                                     IMAGE_ICON,
+                                     cxIcon,
+                                     cyIcon,
+                                     LR_DEFAULTCOLOR));
 }
 
 /*
@@ -71,8 +98,10 @@ PasswdDialog::PasswdDialog(const std::wstring &window_title) :
  */
 PasswdDialog::~PasswdDialog()
 {
-    // Delete the icon object
-    if (hIcon != NULL) DestroyIcon(hIcon);
+    // Delete the icon objects
+    if (hIconLock != NULL) DestroyIcon(hIconLock);
+    if (hIconEyeVisible != NULL) DestroyIcon(hIconEyeVisible);
+    if (hIconEyeHidden != NULL) DestroyIcon(hIconEyeHidden);
 }
 
 /*
@@ -109,29 +138,35 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
                                    LPARAM lParam,
                                    BOOL &bHandled)
 {
-    HWND window_handle;
-
     CAxDialogImpl<PasswdDialog>::OnInitDialog(uMsg, wParam, lParam, bHandled);
-    bHandled = TRUE;
 
     // Are we encrypting?
     encrypting = (lParam != 0) ? true : false;
 
     // If the lock icon is available, show it
-    if (hIcon != NULL) SetIcon(hIcon);
+    if (hIconLock != NULL) SetIcon(hIconLock);
+
+    // Set the icon on the button
+    ShowEyeIcon(hIconEyeVisible);
 
     // Position the dialog
-    CenterWindow(GetForegroundWindow());
+    CenterWindow(NULL);
+
+    // Determine the default password character
+    DeterminePasswordCharacter();
 
     // If not encrypting, hide the password confirmation controls
     if (!encrypting)
     {
         // Hide the password confirmation controls
-        window_handle = GetDlgItem(IDC_PASSWDCONFIRM);
-        ::ShowWindow(window_handle, SW_HIDE);
+        HWND window_handle = GetDlgItem(IDC_PASSWDCONFIRM);
+        if (window_handle != NULL) ::ShowWindow(window_handle, SW_HIDE);
         window_handle = GetDlgItem(IDC_ENTERPASSWDCONFIRM);
-        ::ShowWindow(window_handle, SW_HIDE);
+        if (window_handle != NULL) ::ShowWindow(window_handle, SW_HIDE);
     }
+
+    // Allow default processing
+    bHandled = false;
 
     return 1;
 }
@@ -165,10 +200,8 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
 LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
                                   WORD wID,
                                   [[maybe_unused]] HWND hWndCtl,
-                                  BOOL &bHandled)
+                                  [[maybe_unused]] BOOL &bHandled)
 {
-    bHandled = TRUE;
-
     // Determine the length of the input
     int password_length = static_cast<int>(
         std::max(SendDlgItemMessage(IDC_PASSWD, WM_GETTEXTLENGTH, 0, 0),
@@ -270,11 +303,196 @@ LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
 LRESULT PasswdDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
                                       WORD wID,
                                       [[maybe_unused]] HWND hWndCtl,
-                                      BOOL &bHandled)
+                                      [[maybe_unused]] BOOL &bHandled)
 {
-    bHandled = TRUE;
     EndDialog(wID);
     return 0;
+}
+
+/*
+ *  PasswdDialog::OnBnClickedShowpassword()
+ *
+ *  Description:
+ *      Actions to take when the user presses the button to reveal password.
+ *
+ *  Parameters:
+ *      wNotifyCode [in]
+ *          The notification code.
+ *
+ *      wID [in]
+ *          The identifier of the menu item, control, or accelerator.  Here,
+ *          is it is the dialog identifier.
+ *
+ *      hWndCtl [in]
+ *          A handle to a window control.
+ *
+ *      bHandled [out]
+ *          Set to true if this message is handled and false if not.
+ *
+ *  Returns:
+ *      Zero indicates success, non-zero indicates failure.
+ *
+ *  Comments:
+ *      None.
+ */
+LRESULT PasswdDialog::OnBnClickedShowpassword(
+                                        [[maybe_unused]] WORD wNotifyCode,
+                                        [[maybe_unused]] WORD wID,
+                                        HWND hWndCtl,
+                                        BOOL &bHandled)
+{
+    // Only respond to clicks
+    if (wNotifyCode != STN_CLICKED) return 0;
+
+    // Toggle the password state
+    show_password = !show_password;
+
+    // Get edit controls
+    HWND hPasswd = GetDlgItem(IDC_PASSWD);
+    HWND hPasswdConfirm = GetDlgItem(IDC_PASSWDCONFIRM);
+
+    // Toggle password visibility
+    if (hPasswd != NULL && hPasswdConfirm != NULL)
+    {
+        wchar_t mask = show_password ? 0 : password_char;
+        ::SendMessage(hPasswd, EM_SETPASSWORDCHAR, (WPARAM) mask, 0);
+        ::SendMessage(hPasswdConfirm, EM_SETPASSWORDCHAR, (WPARAM) mask, 0);
+
+        // Force edit controls to redraw
+        ::InvalidateRect(hPasswd, NULL, TRUE);
+        ::InvalidateRect(hPasswdConfirm, NULL, TRUE);
+
+        // Set the icon on the button
+        ShowEyeIcon(show_password ? hIconEyeHidden : hIconEyeVisible);
+
+        // Make the window control appear sunken if showing the password
+        SetSunkenWindowStyle(hWndCtl, show_password);
+    }
+
+    // Allow default processing
+    bHandled = false;
+
+    return 0;
+}
+
+/*
+ *  PasswdDialog::GetPasswordCharacter()
+ *
+ *  Description:
+ *      Determine what character the system uses for hiding passwords.
+ *
+ *  Parameters:
+ *      None.
+ *
+ *  Returns:
+ *      The character to use for hiding passwords.
+ *
+ *  Comments:
+ *      None.
+ */
+void PasswdDialog::DeterminePasswordCharacter()
+{
+    HWND hPasswd = GetDlgItem(IDC_PASSWD);
+
+    // Unable to get the window handle, so give up
+    if (!hPasswd) return;
+
+    // Ask the password input control what the password character is
+    password_char =
+        static_cast<wchar_t>(::SendMessage(hPasswd, EM_GETPASSWORDCHAR, 0, 0));
+
+    // Fallback to '*' if query fails
+    if (password_char == 0) password_char = '*';
+}
+
+/*
+ *  PasswdDialog::SetSunkenWindowStyle()
+ *
+ *  Description:
+ *      This function will set the WS_SUNKEN window style (or remove it) to
+ *      lend to the illusion of a button press.
+ *
+ *  Parameters:
+ *      control_handle [in]
+ *          The handle to the window control to modify.
+ *
+ *      sunken [in]
+ *          True if it should appear sunken, false if not.
+ *
+ *  Returns:
+ *      Nothing.
+ *
+ *  Comments:
+ *      None.
+ */
+void PasswdDialog::SetSunkenWindowStyle(HWND control_handle, bool sunken)
+{
+    // Do nothing if the handle is NULL
+    if (control_handle == NULL) return;
+
+    // Get the current window style
+    LONG_PTR style = ::GetWindowLongPtr(control_handle, GWL_EXSTYLE);
+
+    // Apply the SS_SUNKEN stype as requested
+    if (sunken)
+    {
+        style |= WS_EX_CLIENTEDGE;
+    }
+    else
+    {
+        style &= ~WS_EX_CLIENTEDGE;
+    }
+    ::SetWindowLongPtr(control_handle, GWL_EXSTYLE, style);
+
+    // Redraw the control to reflect the style change
+
+    // Force style change to take effect
+    ::SetWindowPos(control_handle,
+                   nullptr,
+                   0,
+                   0,
+                   0,
+                   0,
+                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED |
+                       SWP_NOACTIVATE);
+
+    ::InvalidateRect(control_handle, nullptr, TRUE);
+    ::UpdateWindow(control_handle);
+}
+
+/*
+ *  PasswdDialog::ShowEyeIcon()
+ *
+ *  Description:
+ *      This function will render the selected eye icon when the user toggles
+ *      between showing and hiding the password text.
+ *
+ *  Parameters:
+ *      icon [in]
+ *          The handle to the icon that should be rendered in the control.
+ *
+ *  Returns:
+ *      Nothing.
+ *
+ *  Comments:
+ *      None.
+ */
+void PasswdDialog::ShowEyeIcon(HICON icon)
+{
+    // Do nothing if the icon handle is invalid
+    if (icon == NULL) return;
+
+    // Set the icon on the button
+    HWND hShowPasswordButton = GetDlgItem(IDC_SHOWPASSWORD);
+
+    // Just return if we cannot get the control handle
+    if (hShowPasswordButton == NULL) return;
+
+    // Apple the desired icon
+    ::SendMessage(hShowPasswordButton,
+                  STM_SETIMAGE,
+                  (WPARAM) IMAGE_ICON,
+                  (LPARAM) icon);
 }
 
 /*

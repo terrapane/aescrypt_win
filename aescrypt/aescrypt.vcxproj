@@ -363,8 +363,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="aescrypt.def" />
-    <None Include="aescrypt_document.ico" />
-    <None Include="aescrypt_lock.ico" />
     <None Include="aescrypt.rgs" />
     <None Include="aescrypt_shell_extension.rgs" />
     <None Include="ctxbitmap.bmp" />
@@ -391,6 +389,12 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="aescrypt.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="aescrypt_document.ico" />
+    <Image Include="aescrypt_lock.ico" />
+    <Image Include="eye_visible.ico" />
+    <Image Include="eye_hidden.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

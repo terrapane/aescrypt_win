@@ -578,7 +578,7 @@
             "Extensions" = "8:.aes"
             "MIME" = "8:application/aes"
             "Icon" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
-            "IconIndex" = "3:204"
+            "IconIndex" = "3:206"
                 "Command"
                 {
                 "Command" = "8:_21F45E740F6D4A1992888D121A1553B3"
@@ -644,7 +644,7 @@
         "ARPCOMMENTS" = "8:AES Crypt - Advanced File Encryption for Windows"
         "ARPURLINFOABOUT" = "8:https://www.aescrypt.com"
         "ARPPRODUCTICON" = "8:_21F45E740F6D4A1992888D121A1553B3"
-        "ARPIconIndex" = "3:107"
+        "ARPIconIndex" = "3:200"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
         "TargetPlatform" = "3:1"

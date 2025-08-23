@@ -29,7 +29,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_AESCRYPT32          ICON                    "aescrypt32.ico"
+IDI_AESCRYPT_LOCK       ICON                    "aescrypt_lock.ico"
 
 
 #ifdef APSTUDIO_INVOKED

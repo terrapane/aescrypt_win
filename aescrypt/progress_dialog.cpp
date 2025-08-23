@@ -52,7 +52,7 @@ ProgressDialog::ProgressDialog(std::function<void()> notify_cancel,
     // Load the icon to show on the system menu
     hIcon =
         static_cast<HICON>(LoadImage(ATL::_AtlBaseModule.GetResourceInstance(),
-                                     MAKEINTRESOURCEW(IDI_LOCK),
+                                     MAKEINTRESOURCEW(IDI_AESCRYPT_LOCK),
                                      IMAGE_ICON,
                                      0,
                                      0,
