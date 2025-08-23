@@ -141,7 +141,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     if (file_list.empty())
     {
         ::MessageBox(NULL,
-                     L"Usage: aescrypt32 [/d|/e] filename ...",
+                     L"Usage: aescrypt_launcher [/d|/e] filename ...",
                      application_name.c_str(),
                      MB_ICONERROR | MB_OK);
         SendMessage(hWnd, WM_DESTROY, 0, 0);

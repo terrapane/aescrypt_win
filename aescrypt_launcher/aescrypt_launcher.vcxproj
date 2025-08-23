@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CD30C494-1D47-43BF-8073-409792B97BE0}</ProjectGuid>
-    <RootNamespace>aescrypt32</RootNamespace>
+    <RootNamespace>aescrypt_launcher</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>aescrypt_launcher</ProjectName>

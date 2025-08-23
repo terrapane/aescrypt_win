@@ -1101,7 +1101,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_21F45E740F6D4A1992888D121A1553B3"
             {
-            "SourcePath" = "8:..\\aescrypt32\\x64\\Release\\aescrypt_launcher.exe"
+            "SourcePath" = "8:..\\aescrypt_launcher\\x64\\Release\\aescrypt_launcher.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_660A60A3C6744A01AAC5B8E0AB9B610E"

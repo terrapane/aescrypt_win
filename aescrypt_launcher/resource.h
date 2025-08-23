@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by aescrypt32.rc
+// Used by aescrypt_launcher.rc
 //
 #define IDS_APP_TITLE                   100
 

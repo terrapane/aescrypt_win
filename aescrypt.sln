@@ -10,7 +10,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aescrypt_ps", "aescrypt_ps\
 		{590843D1-840A-4653-8670-37770D9A356C} = {590843D1-840A-4653-8670-37770D9A356C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aescrypt32", "aescrypt32\aescrypt32.vcxproj", "{CD30C494-1D47-43BF-8073-409792B97BE0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "aescrypt_launcher", "aescrypt_launcher\aescrypt_launcher.vcxproj", "{CD30C494-1D47-43BF-8073-409792B97BE0}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "setup", "setup\setup.vdproj", "{5AC4DA6C-5FC6-40B4-9B31-BB544274AD6C}"
 	ProjectSection(ProjectDependencies) = postProject

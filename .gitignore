@@ -8,10 +8,10 @@ aescrypt/aescrypt_p.c
 aescrypt/aescrypt.h
 aescrypt/dlldata.c
 aescrypt/aescrypt.vcxproj.user
-aescrypt32/x64/*
-aescrypt32/x32/*
-aescrypt32/aescrypt32.aps
-aescrypt32/aescrypt32.vcxproj.user
+aescrypt_launcher/x64/*
+aescrypt_launcher/x32/*
+aescrypt_launcher/aescrypt_launcher.aps
+aescrypt_launcher/aescrypt_launcher.vcxproj.user
 aescrypt_ps/aescrypt_ps.vcxproj.user
 aescrypt_ps/x64/*
 aescrypt_ps/x32/*
