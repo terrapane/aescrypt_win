@@ -23,7 +23,7 @@
     <RootNamespace>aescrypt32</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>aescrypt32</ProjectName>
+    <ProjectName>aescrypt_launcher</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -195,7 +195,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aescrypt32.cpp" />
+    <ClCompile Include="aescrypt_launcher.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -204,17 +204,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aescrypt32.h" />
+    <ClInclude Include="aescrypt_launcher.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="aescrypt32.ico" />
+    <None Include="aescrypt_lock.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="aescrypt32.rc" />
+    <ResourceCompile Include="aescrypt_launcher.rc" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\aescrypt\aescrypt.vcxproj">

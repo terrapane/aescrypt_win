@@ -9,8 +9,8 @@
  *      Paul E. Jones <paulej@packetizer.com>
  *
  *  Description:
- *      This module contains the main entry points for the DLL that are
- *      called by the Windows shell (Explorer) and by the aescrypt32.exe
+ *      This module contains the main entry points for the DLL that are called
+ *      by the Windows shell (Explorer) and by the aescrypt_launcher.exe
  *      program via the published functions defined herein.
  *
  *  Portability Issues:
@@ -115,15 +115,15 @@ STDAPI DllUnregisterServer()
     return hr;
 }
 
-// Exported function that allows aescrypt32.exe use this library to encrypt or
-// decrypt a list of files
+// Exported function that allows aescrypt_launcher.exe use this library to
+// encrypt or decrypt a list of files
 __declspec(dllexport) void __cdecl ProcessFiles(FileList &file_list,
                                                 bool encrypt)
 {
    Worker_Threads.ProcessFiles(file_list, encrypt);
 }
 
-// Exported function that allows aescrypt32.exe determine if all active
+// Exported function that allows aescrypt_launcher.exe determine if all active
 // encryption / decryption threads have completed work
 __declspec(dllexport) bool __cdecl AESLibraryBusy()
 {

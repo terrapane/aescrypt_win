@@ -218,9 +218,9 @@ bool WorkerThreads::IsBusy()
  *
  *  Description:
  *      This function is called once the user selects the shell extension
- *      menu option or by the aescrypt32.exe (usually when a user double-clicks
- *      on a file having a .aes extension).  This will prompt the user for a
- *      a password and then invoke a thread to handle the encryption or
+ *      menu option or by the aescrypt_launcher.exe (usually when a user
+ *      double-clicks on a file having a .aes extension).  This will prompt the
+ *      user for a password and then invoke a thread to handle the encryption or
  *      decryption process.
  *
  *  Parameters:

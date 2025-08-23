@@ -1,5 +1,5 @@
 /*
- *  aescrypt32.h
+ *  aescrypt_launcher.h
  *
  *  Copyright (C) 2006, 2008, 2013, 2024
  *  Terrapane Corporation

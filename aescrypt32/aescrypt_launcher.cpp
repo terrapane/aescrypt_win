@@ -1,5 +1,5 @@
 /*
- *  aescrypt32.cpp
+ *  aescrypt_launcher.cpp
  *
  *  Copyright (C) 2006, 2008, 2013, 2024, 2025
  *  Terrapane Corporation
@@ -26,7 +26,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <cstdint>
-#include "aescrypt32.h"
+#include "aescrypt_launcher.h"
 
 // Windows Callback Procedure
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
