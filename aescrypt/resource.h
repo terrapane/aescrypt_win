@@ -12,7 +12,7 @@
 
 #define IDB_CTXBITMAP                   205
 
-#define IDI_AESCRYPT_DOCUMENT           206
+#define IDI_AESCRYPT_PAPER              206
 #define IDI_AESCRYPT_LOCK               207
 #define IDI_EYE_VISIBLE                 208
 #define IDI_EYE_HIDDEN                  209

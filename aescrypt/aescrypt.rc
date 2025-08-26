@@ -109,7 +109,7 @@ IDB_CTXBITMAP           BITMAP                  "ctxbitmap.bmp"
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_AESCRYPT_DOCUMENT   ICON                    "aescrypt_document.ico"
+IDI_AESCRYPT_PAPER      ICON                    "aescrypt_paper.ico"
 
 IDI_AESCRYPT_LOCK       ICON                    "aescrypt_lock.ico"
 
