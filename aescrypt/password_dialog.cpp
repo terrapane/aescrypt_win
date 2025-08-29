@@ -165,9 +165,10 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
         if (window_handle != NULL) ::ShowWindow(window_handle, SW_HIDE);
     }
 
-    // Allow default processing
-    bHandled = false;
+    // Indicate message was handled
+    bHandled = TRUE;
 
+    // Returning 1 sets focus the first control with WS_TABSTOP set
     return 1;
 }
 
@@ -200,7 +201,7 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
 LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
                                   WORD wID,
                                   [[maybe_unused]] HWND hWndCtl,
-                                  [[maybe_unused]] BOOL &bHandled)
+                                  BOOL &bHandled)
 {
     // Determine the length of the input
     int password_length = static_cast<int>(
@@ -215,6 +216,15 @@ LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
 
     // Determine the actual text length
     password.resize(wcslen(password.data()));
+
+    // Ensure we got a password for encrypting or decrypting
+    if (password.empty())
+    {
+        MessageBox(L"A password was not entered.",
+                   window_title.c_str(),
+                   MB_OK | MB_ICONWARNING);
+        return 0;
+    }
 
     // If encrypting files, check to make sure that the password entered into
     // the conformation field matches
@@ -234,6 +244,15 @@ LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
         // Determine the actual text length
         password_confirm.resize(wcslen(password_confirm.data()));
 
+        // Ensure we got a password confirmation
+        if (password_confirm.empty())
+        {
+            MessageBox(L"A password confirmation was not entered.",
+                       window_title.c_str(),
+                       MB_OK | MB_ICONWARNING);
+            return 0;
+        }
+
         // Check to see if the passwords match
         if (password != password_confirm)
         {
@@ -243,33 +262,13 @@ LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
                        MB_OK | MB_ICONWARNING);
             return 0;
         }
-
-        // Ensure we got a password
-        if (password.empty())
-        {
-            MessageBox(L"A password was not entered.",
-                       window_title.c_str(),
-                       MB_OK | MB_ICONWARNING);
-            return 0;
-        }
-
-        // Close the dialog box
-        EndDialog(wID);
-
-        return 0;
     }
 
-    // Ensure we got a password for decrypting
-    if (password.empty())
-    {
-        MessageBox(L"A password was not entered.",
-                   window_title.c_str(),
-                   MB_OK | MB_ICONWARNING);
-        return 0;
-    }
-
-    // Close the dialog box
+    // Close the window
     EndDialog(wID);
+
+    // Indicate that the message was handled
+    bHandled = TRUE;
 
     return 0;
 }
@@ -303,14 +302,19 @@ LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
 LRESULT PasswdDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
                                       WORD wID,
                                       [[maybe_unused]] HWND hWndCtl,
-                                      [[maybe_unused]] BOOL &bHandled)
+                                      BOOL &bHandled)
 {
+    // Close the window
     EndDialog(wID);
+
+    // Indicate that the message was handled
+    bHandled = TRUE;
+
     return 0;
 }
 
 /*
- *  PasswdDialog::OnBnClickedShowpassword()
+ *  PasswdDialog::OnClickedShowPassword()
  *
  *  Description:
  *      Actions to take when the user presses the button to reveal password.
@@ -335,11 +339,10 @@ LRESULT PasswdDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
  *  Comments:
  *      None.
  */
-LRESULT PasswdDialog::OnBnClickedShowpassword(
-                                        [[maybe_unused]] WORD wNotifyCode,
-                                        [[maybe_unused]] WORD wID,
-                                        HWND hWndCtl,
-                                        BOOL &bHandled)
+LRESULT PasswdDialog::OnClickedShowPassword([[maybe_unused]] WORD wNotifyCode,
+                                            [[maybe_unused]] WORD wID,
+                                            HWND hWndCtl,
+                                            BOOL &bHandled)
 {
     // Only respond to clicks
     if (wNotifyCode != STN_CLICKED) return 0;
@@ -369,8 +372,8 @@ LRESULT PasswdDialog::OnBnClickedShowpassword(
         SetSunkenWindowStyle(hWndCtl, show_password);
     }
 
-    // Allow default processing
-    bHandled = false;
+    // Indicate that the message was handled
+    bHandled = TRUE;
 
     return 0;
 }

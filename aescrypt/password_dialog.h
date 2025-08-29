@@ -40,7 +40,7 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
             CHAIN_MSG_MAP(CAxDialogImpl<PasswdDialog>)
             COMMAND_HANDLER(IDC_SHOWPASSWORD,
                             STN_CLICKED,
-                            OnBnClickedShowpassword)
+                            OnClickedShowPassword)
         END_MSG_MAP()
 
         LRESULT OnInitDialog(UINT uMsg,
@@ -58,10 +58,10 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
                                 HWND hWndCtl,
                                 BOOL &bHandled);
 
-        LRESULT OnBnClickedShowpassword(WORD wNotifyCode,
-                                        WORD wID,
-                                        HWND hWndCtl,
-                                        BOOL &bHandled);
+        LRESULT OnClickedShowPassword(WORD wNotifyCode,
+                                      WORD wID,
+                                      HWND hWndCtl,
+                                      BOOL &bHandled);
 
         Terra::SecUtil::SecureWString GetPassword();
 

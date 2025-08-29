@@ -116,7 +116,6 @@ LRESULT ProgressDialog::OnInitDialog(UINT uMsg,
                                      BOOL &bHandled)
 {
     CAxDialogImpl<ProgressDialog>::OnInitDialog(uMsg, wParam, lParam, bHandled);
-    bHandled = TRUE;
 
     // Are we encrypting?
     bool encrypting = (lParam != 0) ? true : false;
@@ -149,7 +148,10 @@ LRESULT ProgressDialog::OnInitDialog(UINT uMsg,
             static_cast<LPARAM>(static_cast<COLORREF>(RGB(0, 102, 204))));
     }
 
-    // Returning 1 puts focus to be placed on this window
+    // Indicate message was handled
+    bHandled = TRUE;
+
+    // Returning 1 sets focus the first control with WS_TABSTOP set
     return 1;
 }
 
@@ -187,7 +189,7 @@ LRESULT ProgressDialog::OnQueryEndSession([[maybe_unused]] UINT uMsg,
                                           [[maybe_unused]] LPARAM lParam,
                                           BOOL &bHandled)
 {
-    // Indicate that the message was handled
+    // No further processing required -- it's safe to end the session
     bHandled = TRUE;
 
     // Indicate that termination is possible
@@ -226,9 +228,6 @@ LRESULT ProgressDialog::OnEndSession([[maybe_unused]] UINT uMsg,
                                      [[maybe_unused]] LPARAM lParam,
                                      BOOL &bHandled)
 {
-    // Indicate that the message was handled
-    bHandled = TRUE;
-
     // If non-zero, the application should terminate
     if (wParam != 0)
     {
@@ -238,6 +237,9 @@ LRESULT ProgressDialog::OnEndSession([[maybe_unused]] UINT uMsg,
         // Issue the notification callback if defined
         if (notify_cancel) notify_cancel();
     }
+
+    // Indicate that the message was handled
+    bHandled = TRUE;
 
     return 0;
 }
@@ -273,9 +275,6 @@ LRESULT ProgressDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
                                         [[maybe_unused]] HWND hWndCtl,
                                         BOOL &bHandled)
 {
-    // Indicate that the message was handled
-    bHandled = TRUE;
-
     // Indicate that processing was cancelled
     cancel_pressed.store(true);
 
@@ -284,6 +283,9 @@ LRESULT ProgressDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
 
     // Hide the window once it is cancelled (if configured to do so)
     if (hide_on_cancel) ShowWindow(SW_HIDE);
+
+    // Allow default processing
+    bHandled = TRUE;
 
     return 0;
 }
