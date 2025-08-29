@@ -44,9 +44,10 @@ PasswdDialog::PasswdDialog(const std::wstring &window_title) :
     password_char{'*'},
     encrypting{false},
     show_password{false},
-    hIconLock{},
-    hIconEyeVisible{},
-    hIconEyeHidden{}
+    hFont{NULL},
+    hIconLock{NULL},
+    hIconEyeVisible{NULL},
+    hIconEyeHidden{NULL}
 {
     // Load the icon to show on the system menu
     hIconLock =
@@ -98,7 +99,8 @@ PasswdDialog::PasswdDialog(const std::wstring &window_title) :
  */
 PasswdDialog::~PasswdDialog()
 {
-    // Delete the icon objects
+    // Delete the various handles
+    if (hFont != NULL) DeleteObject(hFont);
     if (hIconLock != NULL) DestroyIcon(hIconLock);
     if (hIconEyeVisible != NULL) DestroyIcon(hIconEyeVisible);
     if (hIconEyeHidden != NULL) DestroyIcon(hIconEyeHidden);
@@ -155,14 +157,43 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
     // Determine the default password character
     DeterminePasswordCharacter();
 
-    // If not encrypting, hide the password confirmation controls
-    if (!encrypting)
+    // Attempt to select Consolas, 8pt for password controls
+    HDC hDC = ::GetDC(NULL);
+    if (hDC)
     {
-        // Hide the password confirmation controls
-        HWND window_handle = GetDlgItem(IDC_PASSWDCONFIRM);
-        if (window_handle != NULL) ::ShowWindow(window_handle, SW_HIDE);
-        window_handle = GetDlgItem(IDC_ENTERPASSWDCONFIRM);
-        if (window_handle != NULL) ::ShowWindow(window_handle, SW_HIDE);
+        hFont = CreateFont(
+            -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72),
+            0, 0, 0,                        // Width, escapement, orientation
+            FW_NORMAL,                      // Weight
+            FALSE, FALSE, FALSE,            // Italic, underline, strikeout
+            DEFAULT_CHARSET,                // Character set
+            OUT_TT_PRECIS,                  // Output precision
+            CLIP_DEFAULT_PRECIS,            // Clipping precision
+            CLEARTYPE_QUALITY,              // Quality
+            DEFAULT_PITCH | FF_MODERN,      // Pitch and family
+            L"Consolas");                   // Font name
+        ::ReleaseDC(NULL, hDC);
+    }
+
+    // Get handles for the password and password confirm edit controls
+    HWND password_handle = GetDlgItem(IDC_PASSWD);
+    HWND password_confirm_handle = GetDlgItem(IDC_PASSWDCONFIRM);
+
+    // Attempt to apply the selected font to edit controls
+    if ((hFont != NULL) && (password_handle != NULL) &&
+        (password_confirm_handle != NULL))
+    {
+        SendMessage(password_handle, WM_SETFONT, (WPARAM) hFont, TRUE);
+        SendMessage(password_confirm_handle, WM_SETFONT, (WPARAM) hFont, TRUE);
+    }
+
+    // If not encrypting, hide the password confirmation controls
+    if (!encrypting && (password_confirm_handle != NULL))
+    {
+        // Hide the password confirmation controls (edit window and label)
+        ::ShowWindow(password_confirm_handle, SW_HIDE);
+        HWND text_handle = GetDlgItem(IDC_ENTERPASSWDCONFIRM);
+        if (text_handle != NULL) ::ShowWindow(text_handle, SW_HIDE);
     }
 
     // Indicate message was handled
@@ -491,7 +522,7 @@ void PasswdDialog::ShowEyeIcon(HICON icon)
     // Just return if we cannot get the control handle
     if (hShowPasswordButton == NULL) return;
 
-    // Apple the desired icon
+    // Apply the desired icon
     ::SendMessage(hShowPasswordButton,
                   STM_SETIMAGE,
                   (WPARAM) IMAGE_ICON,

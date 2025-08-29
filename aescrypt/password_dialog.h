@@ -74,6 +74,7 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
         wchar_t password_char;
         bool encrypting;
         bool show_password;
+        HFONT hFont;
         HICON hIconLock;
         HICON hIconEyeVisible;
         HICON hIconEyeHidden;
