@@ -38,9 +38,7 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
             COMMAND_HANDLER(IDOK, BN_CLICKED, OnClickedOK)
             COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnClickedCancel)
             CHAIN_MSG_MAP(CAxDialogImpl<PasswdDialog>)
-            COMMAND_HANDLER(IDC_SHOWPASSWORD,
-                            STN_CLICKED,
-                            OnClickedShowPassword)
+            COMMAND_HANDLER(IDC_SHOWPASSWORD, BN_CLICKED, OnClickedShowPassword)
         END_MSG_MAP()
 
         LRESULT OnInitDialog(UINT uMsg,
@@ -67,7 +65,6 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
 
     protected:
         void DeterminePasswordCharacter();
-        void SetSunkenWindowStyle(HWND control_handle, bool sunken);
         void ShowEyeIcon(HICON eye);
 
         std::wstring window_title;

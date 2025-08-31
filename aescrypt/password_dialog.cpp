@@ -372,11 +372,11 @@ LRESULT PasswdDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
  */
 LRESULT PasswdDialog::OnClickedShowPassword([[maybe_unused]] WORD wNotifyCode,
                                             [[maybe_unused]] WORD wID,
-                                            HWND hWndCtl,
+                                            [[maybe_unused]] HWND hWndCtl,
                                             BOOL &bHandled)
 {
     // Only respond to clicks
-    if (wNotifyCode != STN_CLICKED) return 0;
+    if (wNotifyCode != BN_CLICKED) return 0;
 
     // Toggle the password state
     show_password = !show_password;
@@ -398,9 +398,6 @@ LRESULT PasswdDialog::OnClickedShowPassword([[maybe_unused]] WORD wNotifyCode,
 
         // Set the icon on the button
         ShowEyeIcon(show_password ? hIconEyeHidden : hIconEyeVisible);
-
-        // Make the window control appear sunken if showing the password
-        SetSunkenWindowStyle(hWndCtl, show_password);
     }
 
     // Indicate that the message was handled
@@ -440,61 +437,6 @@ void PasswdDialog::DeterminePasswordCharacter()
 }
 
 /*
- *  PasswdDialog::SetSunkenWindowStyle()
- *
- *  Description:
- *      This function will set the WS_SUNKEN window style (or remove it) to
- *      lend to the illusion of a button press.
- *
- *  Parameters:
- *      control_handle [in]
- *          The handle to the window control to modify.
- *
- *      sunken [in]
- *          True if it should appear sunken, false if not.
- *
- *  Returns:
- *      Nothing.
- *
- *  Comments:
- *      None.
- */
-void PasswdDialog::SetSunkenWindowStyle(HWND control_handle, bool sunken)
-{
-    // Do nothing if the handle is NULL
-    if (control_handle == NULL) return;
-
-    // Get the current window style
-    LONG_PTR style = ::GetWindowLongPtr(control_handle, GWL_EXSTYLE);
-
-    // Apply the SS_SUNKEN stype as requested
-    if (sunken)
-    {
-        style |= WS_EX_CLIENTEDGE;
-    }
-    else
-    {
-        style &= ~WS_EX_CLIENTEDGE;
-    }
-    ::SetWindowLongPtr(control_handle, GWL_EXSTYLE, style);
-
-    // Redraw the control to reflect the style change
-
-    // Force style change to take effect
-    ::SetWindowPos(control_handle,
-                   nullptr,
-                   0,
-                   0,
-                   0,
-                   0,
-                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED |
-                       SWP_NOACTIVATE);
-
-    ::InvalidateRect(control_handle, nullptr, TRUE);
-    ::UpdateWindow(control_handle);
-}
-
-/*
  *  PasswdDialog::ShowEyeIcon()
  *
  *  Description:
@@ -524,9 +466,10 @@ void PasswdDialog::ShowEyeIcon(HICON icon)
 
     // Apply the desired icon
     ::SendMessage(hShowPasswordButton,
-                  STM_SETIMAGE,
+                  BM_SETIMAGE,
                   (WPARAM) IMAGE_ICON,
                   (LPARAM) icon);
+    ::InvalidateRect(hShowPasswordButton, NULL, TRUE);
 }
 
 /*
