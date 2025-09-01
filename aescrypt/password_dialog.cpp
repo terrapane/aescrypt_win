@@ -47,7 +47,9 @@ PasswdDialog::PasswdDialog(const std::wstring &window_title) :
     hFont{NULL},
     hIconLock{NULL},
     hIconEyeVisible{NULL},
-    hIconEyeHidden{NULL}
+    hIconEyeHidden{NULL},
+    cxIcon{},
+    cyIcon{}
 {
     // Load the icon to show on the system menu
     hIconLock =
@@ -60,8 +62,8 @@ PasswdDialog::PasswdDialog(const std::wstring &window_title) :
 
 
     // Load icons that are 16x16 or larger to facilitate scaling
-    int cxIcon = std::max(GetSystemMetrics(SM_CXSMICON), 16);
-    int cyIcon = std::max(GetSystemMetrics(SM_CYSMICON), 16);
+    cxIcon = std::max(GetSystemMetrics(SM_CXSMICON), 16);
+    cyIcon = std::max(GetSystemMetrics(SM_CYSMICON), 16);
 
     // Load the "visible" eye icon to use when the user wishes to show passwords
     hIconEyeVisible =
@@ -148,9 +150,6 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
     // If the lock icon is available, show it
     if (hIconLock != NULL) SetIcon(hIconLock);
 
-    // Set the icon on the button
-    ShowEyeIcon(hIconEyeVisible);
-
     // Position the dialog
     CenterWindow(NULL);
 
@@ -201,6 +200,83 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
 
     // Returning 1 sets focus the first control with WS_TABSTOP set
     return 1;
+}
+
+/*
+ *  PasswdDialog::OnDrawItem()
+ *
+ *  Description:
+ *      This function is called to draw draw elements of the dialog window,
+ *      but the only one that must be handled is the owner-drawn "eye" button.
+ *
+ *  Parameters:
+ *      uMsg [in]
+ *          The associated Windows message, which should be WM_DRAWITEM but
+ *          this can be safely ignored.
+ *
+ *      wParam [in]
+ *          Word parameter, but not used by this function, which indicates
+            what needs to be drawn.
+ *
+ *      lParam [in]
+ *          This parameters will hold the LPDRAWITEMSTRUCT of what needs to be
+ *          drawn.
+ *
+ *      bHandled [out]
+ *          This is set to true if this function handles the message.
+ *
+ *  Returns:
+ *      Return FALSE if not handled, TRUE if it is.
+ *
+ *  Comments:
+ *      None.
+ */
+LRESULT PasswdDialog::OnDrawItem([[maybe_unused]] UINT uMsg,
+                                 WPARAM wParam,
+                                 LPARAM lParam,
+                                 BOOL &bHandled)
+{
+    // This function will only draw the button to reveal the password
+    if (wParam != IDC_SHOWPASSWORD)
+    {
+        bHandled = FALSE;
+        return FALSE;
+    }
+
+    LPDRAWITEMSTRUCT pDIS = (LPDRAWITEMSTRUCT) lParam;
+    HDC hDC = pDIS->hDC;
+    RECT rc = pDIS->rcItem;
+
+    // Fill background with dialog's COLOR_3DFACE
+    HBRUSH hBrush = (HBRUSH) GetSysColorBrush(COLOR_3DFACE);
+    FillRect(hDC, &rc, hBrush);
+
+    // Draw sunken border if password is visible
+    if (show_password)
+    {
+        DrawEdge(hDC, &rc, EDGE_SUNKEN, BF_RECT);
+    }
+    else
+    {
+        DrawEdge(hDC, &rc, EDGE_ETCHED, BF_FLAT);
+    }
+
+    // Draw the icon centered
+    HICON hIcon = show_password ? hIconEyeHidden : hIconEyeVisible;
+    if (hIcon)
+    {
+        int x = rc.left + (rc.right - rc.left - cxIcon) / 2;
+        int y = rc.top + (rc.bottom - rc.top - cyIcon) / 2;
+        DrawIconEx(hDC, x, y, hIcon, cxIcon, cyIcon, 0, NULL, DI_NORMAL);
+    }
+
+    // Draw focus rectangle if focused
+    if (pDIS->itemState & ODS_FOCUS) DrawFocusRect(hDC, &rc);
+
+    // Indicate the message was handled
+    bHandled = TRUE;
+
+    return TRUE;
 }
 
 /*
@@ -372,7 +448,7 @@ LRESULT PasswdDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
  */
 LRESULT PasswdDialog::OnClickedShowPassword([[maybe_unused]] WORD wNotifyCode,
                                             [[maybe_unused]] WORD wID,
-                                            [[maybe_unused]] HWND hWndCtl,
+                                            HWND hWndCtl,
                                             BOOL &bHandled)
 {
     // Only respond to clicks
@@ -396,8 +472,8 @@ LRESULT PasswdDialog::OnClickedShowPassword([[maybe_unused]] WORD wNotifyCode,
         ::InvalidateRect(hPasswd, NULL, TRUE);
         ::InvalidateRect(hPasswdConfirm, NULL, TRUE);
 
-        // Set the icon on the button
-        ShowEyeIcon(show_password ? hIconEyeHidden : hIconEyeVisible);
+        // Cause the eye control to redraw
+        ::InvalidateRect(hWndCtl, NULL, TRUE);
     }
 
     // Indicate that the message was handled
@@ -434,42 +510,6 @@ void PasswdDialog::DeterminePasswordCharacter()
 
     // Fallback to '*' if query fails
     if (password_char == 0) password_char = '*';
-}
-
-/*
- *  PasswdDialog::ShowEyeIcon()
- *
- *  Description:
- *      This function will render the selected eye icon when the user toggles
- *      between showing and hiding the password text.
- *
- *  Parameters:
- *      icon [in]
- *          The handle to the icon that should be rendered in the control.
- *
- *  Returns:
- *      Nothing.
- *
- *  Comments:
- *      None.
- */
-void PasswdDialog::ShowEyeIcon(HICON icon)
-{
-    // Do nothing if the icon handle is invalid
-    if (icon == NULL) return;
-
-    // Set the icon on the button
-    HWND hShowPasswordButton = GetDlgItem(IDC_SHOWPASSWORD);
-
-    // Just return if we cannot get the control handle
-    if (hShowPasswordButton == NULL) return;
-
-    // Apply the desired icon
-    ::SendMessage(hShowPasswordButton,
-                  BM_SETIMAGE,
-                  (WPARAM) IMAGE_ICON,
-                  (LPARAM) icon);
-    ::InvalidateRect(hShowPasswordButton, NULL, TRUE);
 }
 
 /*

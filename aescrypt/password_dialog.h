@@ -35,6 +35,7 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
 
         BEGIN_MSG_MAP(PasswdDialog)
             MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
+            MESSAGE_HANDLER(WM_DRAWITEM, OnDrawItem)
             COMMAND_HANDLER(IDOK, BN_CLICKED, OnClickedOK)
             COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnClickedCancel)
             CHAIN_MSG_MAP(CAxDialogImpl<PasswdDialog>)
@@ -45,6 +46,11 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
                              WPARAM wParam,
                              LPARAM lParam,
                              BOOL &bHandled);
+
+        LRESULT OnDrawItem(UINT uMsg,
+                           WPARAM wParam,
+                           LPARAM lParam,
+                           BOOL &bHandled);
 
         LRESULT OnClickedOK(WORD wNotifyCode,
                             WORD wID,
@@ -65,7 +71,6 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
 
     protected:
         void DeterminePasswordCharacter();
-        void ShowEyeIcon(HICON eye);
 
         std::wstring window_title;
         wchar_t password_char;
@@ -75,5 +80,7 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
         HICON hIconLock;
         HICON hIconEyeVisible;
         HICON hIconEyeHidden;
+        int cxIcon;
+        int cyIcon;
         Terra::SecUtil::SecureWString password;
 };
