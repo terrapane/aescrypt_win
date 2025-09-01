@@ -189,7 +189,7 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>$(SolutionDir)\out\install\$(Platform)-$(Configuration)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;Bcrypt.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);UxTheme.lib;Bcrypt.lib;secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(SolutionDir)out\install\$(Platform)-$(Configuration)\bin\aescrypt.exe" "$(SolutionDir)out\install\"</Command>
@@ -288,7 +288,7 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
       <AdditionalLibraryDirectories>$(SolutionDir)\out\install\$(Platform)-$(Configuration)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;Bcrypt.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);UxTheme.lib;Bcrypt.lib;secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
@@ -307,7 +307,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)\out\install\$(Platform)-$(Configuration)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;Bcrypt.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);UxTheme.lib;Bcrypt.lib;secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y "$(SolutionDir)out\install\$(Platform)-$(Configuration)\bin\aescrypt.exe" "$(SolutionDir)out\install\"</Command>

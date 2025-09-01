@@ -18,6 +18,8 @@
 
 #include <algorithm>
 #include "pch.h"
+#include <uxtheme.h>
+#include <vssym32.h>
 #include "password_dialog.h"
 #include "secure_containers.h"
 #include "globals.h"
@@ -182,8 +184,14 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
     if ((hFont != NULL) && (password_handle != NULL) &&
         (password_confirm_handle != NULL))
     {
-        SendMessage(password_handle, WM_SETFONT, (WPARAM) hFont, TRUE);
-        SendMessage(password_confirm_handle, WM_SETFONT, (WPARAM) hFont, TRUE);
+        SendMessage(password_handle,
+                    WM_SETFONT,
+                    reinterpret_cast<WPARAM>(hFont),
+                    TRUE);
+        SendMessage(password_confirm_handle,
+                    WM_SETFONT,
+                    reinterpret_cast<WPARAM>(hFont),
+                    TRUE);
     }
 
     // If not encrypting, hide the password confirmation controls
@@ -243,35 +251,82 @@ LRESULT PasswdDialog::OnDrawItem([[maybe_unused]] UINT uMsg,
         return FALSE;
     }
 
-    LPDRAWITEMSTRUCT pDIS = (LPDRAWITEMSTRUCT) lParam;
+    LPDRAWITEMSTRUCT pDIS = reinterpret_cast<LPDRAWITEMSTRUCT>(lParam);
     HDC hDC = pDIS->hDC;
     RECT rc = pDIS->rcItem;
 
     // Fill background with dialog's COLOR_3DFACE
-    HBRUSH hBrush = (HBRUSH) GetSysColorBrush(COLOR_3DFACE);
+    HBRUSH hBrush = reinterpret_cast<HBRUSH>(GetSysColorBrush(COLOR_3DFACE));
     FillRect(hDC, &rc, hBrush);
 
-    // Draw sunken border if password is visible
-    if (show_password)
+    // Area where to draw the icon
+    RECT rectIcon = rc;
+
+    // Draw themed button border (rounded corners)
+    HTHEME hTheme = OpenThemeData(pDIS->hwndItem, L"Button");
+    if (hTheme != NULL)
     {
-        DrawEdge(hDC, &rc, EDGE_SUNKEN, BF_RECT);
+        // Get content rectangle (excludes border)
+        RECT rect{};
+        GetThemeBackgroundContentRect(hTheme,
+                                      hDC,
+                                      BP_PUSHBUTTON,
+                                      PBS_NORMAL,
+                                      &rc,
+                                      &rect);
+
+        // Reassign the icon drawing area
+        rectIcon = rect;
+
+        // Clip out the content area to preserve COLOR_3DFACE background
+        ExcludeClipRect(hDC, rect.left, rect.top, rect.right, rect.bottom);
+
+        // Draw themed border based on state
+        int iStateId = show_password ? PBS_PRESSED : PBS_NORMAL;
+        if (pDIS->itemState & ODS_DISABLED)
+        {
+            iStateId = PBS_DISABLED;
+        }
+        else if (pDIS->itemState & ODS_HOTLIGHT)
+        {
+            iStateId = PBS_HOT;
+        }
+        DrawThemeBackground(hTheme, hDC, BP_PUSHBUTTON, iStateId, &rc, NULL);
+
+        // Restore full clipping region for icon and focus rectangle
+        SelectClipRgn(hDC, NULL);
+        CloseThemeData(hTheme);
     }
     else
     {
-        DrawEdge(hDC, &rc, EDGE_ETCHED, BF_FLAT);
+        // Draw rectangular edge if themes are disabled
+        if (show_password)
+        {
+            DrawEdge(hDC, &rc, EDGE_SUNKEN, BF_RECT);
+        }
+        else
+        {
+            DrawEdge(hDC, &rc, EDGE_ETCHED, BF_FLAT);
+        }
     }
 
     // Draw the icon centered
     HICON hIcon = show_password ? hIconEyeHidden : hIconEyeVisible;
     if (hIcon)
     {
-        int x = rc.left + (rc.right - rc.left - cxIcon) / 2;
-        int y = rc.top + (rc.bottom - rc.top - cyIcon) / 2;
-        DrawIconEx(hDC, x, y, hIcon, cxIcon, cyIcon, 0, NULL, DI_NORMAL);
+        int x = rectIcon.left + (rectIcon.right - rectIcon.left - cxIcon) / 2;
+        int y = rectIcon.top + (rectIcon.bottom - rectIcon.top - cyIcon) / 2;
+        UINT di_flags = (pDIS->itemState & ODS_DISABLED) ? DI_IMAGE : DI_NORMAL;
+        DrawIconEx(hDC, x, y, hIcon, cxIcon, cyIcon, 0, NULL, di_flags);
     }
 
     // Draw focus rectangle if focused
-    if (pDIS->itemState & ODS_FOCUS) DrawFocusRect(hDC, &rc);
+    if (pDIS->itemState & ODS_FOCUS)
+    {
+        RECT rcFocus = rc;
+        InflateRect(&rcFocus, -3, -3);  // Inset to fit inside themed border
+        DrawFocusRect(hDC, &rcFocus);
+    }
 
     // Indicate the message was handled
     bHandled = TRUE;

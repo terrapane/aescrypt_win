@@ -99,6 +99,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_BB8C300B4A6DA564CE0F4DB7C60CC443"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_C02056D8308F3522707030A44E852F86"
         "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
@@ -428,6 +434,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BB8C300B4A6DA564CE0F4DB7C60CC443"
+            {
+            "SourcePath" = "8:UxTheme.dll"
+            "TargetName" = "8:UxTheme.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_660A60A3C6744A01AAC5B8E0AB9B610E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:4"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C02056D8308F3522707030A44E852F86"
             {
             "SourcePath" = "8:VCRUNTIME140_1.dll"
@@ -626,7 +652,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AES Crypt"
         "ProductCode" = "8:{907B7815-A2E5-4F50-9B83-699CD0C0C562}"
-        "PackageCode" = "8:{85539129-B7BA-47B3-BE10-CF02F9363047}"
+        "PackageCode" = "8:{09238344-06CA-45A4-8FB6-63A3C0A86882}"
         "UpgradeCode" = "8:{92D16E60-1F16-4183-A78C-086C07CF436A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
