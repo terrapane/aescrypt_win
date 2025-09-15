@@ -158,12 +158,12 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
     // Determine the default password character
     DeterminePasswordCharacter();
 
-    // Attempt to select Consolas, 8pt for password controls
+    // Select Consolas for the edit control font (makes zeros easier to see)
     HDC hDC = ::GetDC(NULL);
     if (hDC)
     {
         hFont = CreateFont(
-            -MulDiv(9, GetDeviceCaps(hDC, LOGPIXELSY), 72),
+            -MulDiv(10, GetDeviceCaps(hDC, LOGPIXELSY), 72),
             0, 0, 0,                        // Width, escapement, orientation
             FW_NORMAL,                      // Weight
             FALSE, FALSE, FALSE,            // Italic, underline, strikeout
