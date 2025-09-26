@@ -67,11 +67,11 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "Comments", "AES Crypt - Advanced File Encryption for Windows"
-            VALUE "CompanyName", "Terrapane Corporation"
+            VALUE "CompanyName", AUTHOR_STR
             VALUE "FileDescription", "AES Crypt Shell Extension Library"
             VALUE "FileVersion", VER_FILEVERSION_STR
             VALUE "InternalName", "aescrypt.dll"
-            VALUE "LegalCopyright", "Copyright (C) 2025"
+            VALUE "LegalCopyright", COPYRIGHT_STR
             VALUE "OriginalFilename", "aescrypt.dll"
             VALUE "ProductName", "AES Crypt"
             VALUE "ProductVersion", VER_PRODUCTVERSION_STR

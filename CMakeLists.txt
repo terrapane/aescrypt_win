@@ -10,12 +10,13 @@ endif()
 project(aescrypt_win
         VERSION 4.4.0.0
         DESCRIPTION  "AES Crypt for Windows Dependencies"
-        HOMEPAGE_URL "https://www.aescrypt.com")
+        HOMEPAGE_URL "https://www.aescrypt.com"
+        LANGUAGES CXX)
 
 set(COPYRIGHT_TEXT "Copyright (C) 2025")
 set(AUTHOR_TEXT    "Terrapane Corporation")
 
-# Produce an output files with version information for consumption by the GUI
+# Produce output files with version information for consumption by the GUI
 configure_file(version.h.in version.h @ONLY)
 configure_file(version.rc.in version.rc @ONLY)
 

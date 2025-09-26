@@ -1,7 +1,7 @@
 /*
  *  password_convert.cpp
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2025
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -57,17 +57,15 @@ SecureU8String PasswordConvertUTF8(std::span<const wchar_t> password,
                               '\0');
 
     // Convert the character string to UTF-8
-    auto [convert_success, length] = Terra::CharUtil::ConvertUTF16ToUTF8(
-        std::span<const std::uint8_t>(
+    auto [result, length] = Terra::CharUtil::ConvertUTF16ToUTF8(
+        std::span<const std::uint8_t>{
             reinterpret_cast<const std::uint8_t *>(password.data()),
-            password.size() * sizeof(wchar_t)),
-        std::span<std::uint8_t>(
-            reinterpret_cast<std::uint8_t *>(u8password.data()),
-            u8password.size()),
+            password.size() * sizeof(wchar_t)},
+        u8password,
         little_endian);
 
     // Verify the that the conversion was successful and non-zero length
-    if (!convert_success || (length == 0)) return {};
+    if (!result || (length == 0)) return {};
 
     // Adjust the password length
     u8password.resize(length);
