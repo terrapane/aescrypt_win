@@ -12,7 +12,7 @@ endif()
 FetchContent_Declare(aescrypt_cli
     GIT_REPOSITORY ${TERRAPANE_SOURCE_URI}/aescrypt_cli.git
     GIT_TAG        b1a5deea9270ad144ae0221f13eeeabac680d537
-    GIT_SHALLOW    true)
+    GIT_SHALLOW    false)
 
 # Install AES Crypt CLI dependencies to get libraries
 set(aescrypt_cli_DEPENDENCIES_INSTALL ON)
