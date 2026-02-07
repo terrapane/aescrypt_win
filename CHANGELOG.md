@@ -1,6 +1,10 @@
 # Change Log
 
-v4.4.0 (In Progress)
+v4.5.0
+
+- Updated dependencies
+
+v4.4.0
 
 - Made it possible to toggle visibility of passwords typed
 - Introduction of a manifest to allow the shell extension to use longer names
