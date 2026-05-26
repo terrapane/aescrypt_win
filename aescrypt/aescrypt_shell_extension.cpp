@@ -1,7 +1,7 @@
 /*
  *  aescrypt_shell_extension.cpp
  *
- *  Copyright (C) 2006, 2008, 2013, 2024
+ *  Copyright (C) 2006-2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -28,6 +28,7 @@
 #include "aescrypt.h"
 #include "aescrypt_shell_extension.h"
 #include "worker_threads.h"
+#include "mode.h"
 #include "has_aes_extension.h"
 
 // Make the global worker thread object visible in this module
@@ -462,8 +463,11 @@ HRESULT AESCryptShellExtension::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
         return E_INVALIDARG;
     }
 
+    const AESCryptMode mode =
+        (aes_files) ? AESCryptMode::Decrypt : AESCryptMode::Encrypt;
+
     // The menu item was invoked, so process the list of files
-    Worker_Threads.ProcessFiles(file_list, (non_aes_files == true));
+    Worker_Threads.ProcessFiles(file_list, mode);
 
     // Clear the file list
     file_list.clear();

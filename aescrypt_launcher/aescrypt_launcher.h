@@ -1,7 +1,7 @@
 /*
  *  aescrypt_launcher.h
  *
- *  Copyright (C) 2006, 2008, 2013, 2024
+ *  Copyright (C) 2006-2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -25,7 +25,8 @@
 #pragma once
 
 #include "file_list.h"
+#include "mode.h"
 
 // Externals in the aescrypt DLL
 bool AESLibraryBusy();
-void ProcessFiles(FileList &file_list, bool encrypt);
+void ProcessFiles(FileList &file_list, AESCryptMode mode);

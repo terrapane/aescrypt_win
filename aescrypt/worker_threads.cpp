@@ -1,7 +1,7 @@
 /*
  *  worker_threads.cpp
  *
- *  Copyright (C) 2006, 2007, 2008, 2013, 2015, 2024, 2025
+ *  Copyright (C) 2006-2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -29,6 +29,7 @@
 #include <terra/charutil/character_utilities.h>
 #include <terra/bitutil/byte_order.h>
 #include "worker_threads.h"
+#include "mode.h"
 #include "password_dialog.h"
 #include "report_error.h"
 #include "progress_dialog.h"
@@ -227,8 +228,8 @@ bool WorkerThreads::IsBusy()
  *      file_list [in]
  *          The list of files to encrypt or decrypt.
  *
- *      encrypt [in]
- *          True if encrypting, false if decrypting.
+ *      mode [in]
+ *          Operational mode indicating encryption or decryption.
  *
  *  Returns:
  *      Nothing.
@@ -236,7 +237,7 @@ bool WorkerThreads::IsBusy()
  *  Comments:
  *      None.
  */
-void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
+void WorkerThreads::ProcessFiles(const FileList &file_list, AESCryptMode mode)
 {
     PasswdDialog password_dialog(application_name);
 
@@ -261,7 +262,9 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
     }
 
     // Prompt the user for a password
-    if (password_dialog.DoModal(::GetActiveWindow(), (encrypt ? 1 : 0)) == IDOK)
+    if (password_dialog.DoModal(
+                            ::GetActiveWindow(),
+                            ((mode == AESCryptMode::Encrypt) ? 1 : 0)) == IDOK)
     {
         // Convert the password to UTF-8 as required by the AES Crypt Engine
         SecureU8String password =
@@ -276,7 +279,7 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, bool encrypt)
             return;
         }
 
-        StartThread(file_list, password, encrypt);
+        StartThread(file_list, password, mode);
     }
 }
 
@@ -340,9 +343,9 @@ void WorkerThreads::CloseThreadHandles()
   *      password [in]
   *         The password to use for encrypting or decrypting.
   *
-  *      encrypt [in]
-  *         True if encrypting, false if decrypting.
-  *
+ *      mode [in]
+ *          Operational mode indicating encryption or decryption.
+ *
   *  Returns:
   *      Nothing.
   *
@@ -351,7 +354,7 @@ void WorkerThreads::CloseThreadHandles()
   */
 void WorkerThreads::StartThread(const FileList &file_list,
                                 const SecureU8String &password,
-                                bool encrypt)
+                                AESCryptMode mode)
 {
     DWORD thread_id;
 
@@ -371,7 +374,7 @@ void WorkerThreads::StartThread(const FileList &file_list,
         // this data in the background
         requests.emplace_back(file_list,
                               password,
-                              encrypt,
+                              mode,
                               thread_id,
                               thread_handle);
 
@@ -453,7 +456,7 @@ void WorkerThreads::ThreadEntry()
     try
     {
         // Encrypt or decrypt files based on the request
-        if (request.encrypt)
+        if (request.mode == AESCryptMode::Encrypt)
         {
             EncryptFiles(request.file_list, request.password);
         }

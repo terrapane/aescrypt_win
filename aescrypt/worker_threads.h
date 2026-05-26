@@ -1,7 +1,7 @@
 /*
  *  worker_threads.cpp
  *
- *  Copyright (C) 2006, 2007, 2008, 2013, 2015, 2024, 2025
+ *  Copyright (C) 2006-2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -32,6 +32,7 @@
 #include "secure_containers.h"
 #include "file_list.h"
 #include "progress_dialog.h"
+#include "mode.h"
 #include "globals.h"
 
 // Type to hold extensions to insert into the container header
@@ -42,7 +43,7 @@ struct RequestData
 {
     FileList file_list;
     SecureU8String password;
-    bool encrypt;
+    AESCryptMode mode;
     DWORD thread_id;
     HANDLE thread_handle;
 };
@@ -58,7 +59,7 @@ class WorkerThreads
         bool IsBusy();
 
         // Process files for encryption (true) or decryption (false)
-        void ProcessFiles(const FileList &file_list, bool encrypt);
+        void ProcessFiles(const FileList &file_list, AESCryptMode mode);
 
         // This should only be called by threads spawned by this class
         void ThreadEntry();
@@ -68,7 +69,7 @@ class WorkerThreads
 
         void StartThread(const FileList &file_list,
                          const SecureU8String &password,
-                         bool encrypt);
+                         AESCryptMode mode);
 
         void EncryptFiles(const FileList &file_list,
                           const SecureU8String &password);

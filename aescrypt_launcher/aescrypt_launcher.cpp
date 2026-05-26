@@ -1,7 +1,7 @@
 /*
  *  aescrypt_launcher.cpp
  *
- *  Copyright (C) 2006, 2008, 2013, 2024, 2025
+ *  Copyright (C) 2006-2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -25,7 +25,9 @@
 #include "pch.h"
 #include <Windows.h>
 #include <tchar.h>
-#include <cstdint>
+#include <string>
+#include "mode.h"
+#include "file_list.h"
 #include "aescrypt_launcher.h"
 
 // Windows Callback Procedure
@@ -54,7 +56,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     HWND hWnd;
     MSG msg;
     int nArgs;
-    bool encrypt = false;
+    AESCryptMode mode{};
     FileList file_list;
     std::wstring application_name(256, '\0');
 
@@ -112,19 +114,19 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         {
             if (!_tcscmp(szArglist[i], L"/d"))
             {
-                encrypt = false;
+                mode = AESCryptMode::Decrypt;
             }
             else if (!_tcscmp(szArglist[i], L"-d"))
             {
-                encrypt = false;
+                mode = AESCryptMode::Decrypt;
             }
             else if (!_tcscmp(szArglist[i], L"/e"))
             {
-                encrypt = true;
+                mode = AESCryptMode::Encrypt;
             }
             else if (!_tcscmp(szArglist[i], L"-e"))
             {
-                encrypt = true;
+                mode = AESCryptMode::Encrypt;
             }
             else
             {
@@ -149,7 +151,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     else
     {
         // Initiate file processing
-        ProcessFiles(file_list, encrypt);
+        ProcessFiles(file_list, mode);
     }
 
     // Sit in a loop waiting for the AES Crypt Library to indicate it is no

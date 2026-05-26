@@ -1,7 +1,7 @@
  /*
  *  aescrypt.cpp
  *
- *  Copyright (C) 2006, 2008, 2013, 2024
+ *  Copyright (C) 2006-2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -22,6 +22,7 @@
 #include "resource.h"
 #include "aescrypt.h"
 #include "worker_threads.h"
+#include "mode.h"
 #include "file_list.h"
 
 // Defines the ATL-based module used by the shell extension
@@ -118,9 +119,9 @@ STDAPI DllUnregisterServer()
 // Exported function that allows aescrypt_launcher.exe use this library to
 // encrypt or decrypt a list of files
 __declspec(dllexport) void __cdecl ProcessFiles(FileList &file_list,
-                                                bool encrypt)
+                                                AESCryptMode mode)
 {
-   Worker_Threads.ProcessFiles(file_list, encrypt);
+   Worker_Threads.ProcessFiles(file_list, mode);
 }
 
 // Exported function that allows aescrypt_launcher.exe determine if all active
