@@ -19,11 +19,10 @@
 #pragma once
 
 #include <Windows.h>
-#include <atlhost.h>
+#include <atlwin.h>
 #include <string>
-#include <terra/secutil/secure_string.h>
 #include "resource.h"
-#include "globals.h"
+#include "secure_containers.h"
 
 class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
 {
@@ -50,7 +49,7 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
         LRESULT OnDrawItem(UINT uMsg,
                            WPARAM wParam,
                            LPARAM lParam,
-                           BOOL &bHandled);
+                           BOOL &bHandled) const;
 
         LRESULT OnClickedOK(WORD wNotifyCode,
                             WORD wID,
@@ -67,7 +66,7 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
                                       HWND hWndCtl,
                                       BOOL &bHandled);
 
-        Terra::SecUtil::SecureWString GetPassword();
+        SecureWString GetPassword() const;
 
     protected:
         void DeterminePasswordCharacter();
@@ -82,5 +81,5 @@ class PasswdDialog : public ATL::CAxDialogImpl<PasswdDialog>
         HICON hIconEyeHidden;
         int cxIcon;
         int cyIcon;
-        Terra::SecUtil::SecureWString password;
+        SecureWString password;
 };

@@ -19,8 +19,8 @@
 #pragma once
 
 #include <Windows.h>
+#include <atlwin.h>
 #include <functional>
-#include <atlhost.h>
 #include <atomic>
 #include "resource.h"
 

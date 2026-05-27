@@ -26,14 +26,12 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <cstddef>
-#include <iostream>
-#include <terra/secutil/secure_string.h>
+#include <ostream>
+#include <istream>
 #include "secure_containers.h"
 #include "file_list.h"
 #include "progress_dialog.h"
 #include "mode.h"
-#include "globals.h"
 
 // Type to hold extensions to insert into the container header
 using ExtensionList = std::vector<std::pair<std::string, std::string>>;

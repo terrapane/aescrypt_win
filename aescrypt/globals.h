@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 
 // Number of KDF iterations to perform when deriving key from password

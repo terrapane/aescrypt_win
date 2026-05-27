@@ -17,19 +17,21 @@
  */
 
 #include "pch.h"
-#include <cstdint>
-#include <cstddef>
+#include <Windows.h>
+#include <atlcomcli.h>
+#include <atldef.h>
+#include <atlbase.h>
+#include <shtypes.h>
+#include <ShObjIdl_core.h>
+#include <wchar.h>
 #include <string>
 #include <vector>
-#include <filesystem>
-#include <algorithm>
-#include <commctrl.h>
-#include <atlcomcli.h>
-#include "aescrypt.h"
+#include <utility>
 #include "aescrypt_shell_extension.h"
 #include "worker_threads.h"
 #include "mode.h"
 #include "has_aes_extension.h"
+#include "resource.h"
 
 // Make the global worker thread object visible in this module
 extern WorkerThreads Worker_Threads;
@@ -364,21 +366,23 @@ HRESULT AESCryptShellExtension::QueryContextMenu(HMENU hMenu,
  *      None.
  */
 #ifdef _M_X64
-HRESULT AESCryptShellExtension::GetCommandString(UINT_PTR idCmd,
+HRESULT AESCryptShellExtension::GetCommandString(
+                                            UINT_PTR idCmd,
 #else
-HRESULT AESCryptShellExtension::GetCommandString(UINT idCmd,
+HRESULT AESCryptShellExtension::GetCommandString(
+                                            UINT idCmd,
 #endif
-                                                 UINT uType,
-                                                 [[maybe_unused]] UINT* puReserved,
-                                                 LPSTR szName,
-                                                 UINT cchMax)
+                                            UINT uType,
+                                            [[maybe_unused]] UINT *puReserved,
+                                            LPSTR szName,
+                                            UINT cchMax)
 {
     const wchar_t *command_text;
 
     // There is only one command, so the idCmd should always be 0
     if (idCmd != 0)
     {
-        ATLASSERT(0);                           // should never get here
+        ATLASSERT(idCmd != 0);                           // should never get here
         return E_INVALIDARG;
     }
 

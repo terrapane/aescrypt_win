@@ -78,12 +78,11 @@ STDAPI  DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOI
 STDAPI DllRegisterServer()
 {
     ATL::CRegKey reg;
-    LSTATUS result;
 
-    result = reg.Open(HKEY_LOCAL_MACHINE,
-                      L"Software\\Microsoft\\Windows\\CurrentVersion\\Shell "
-                      L"Extensions\\Approved",
-                      KEY_SET_VALUE);
+    LSTATUS result = reg.Open(HKEY_LOCAL_MACHINE,
+                              L"Software\\Microsoft\\Windows\\CurrentVersion\\"
+                              L"Shell Extensions\\Approved",
+                              KEY_SET_VALUE);
 
     if (result!= ERROR_SUCCESS) return E_ACCESSDENIED;
 
@@ -99,19 +98,19 @@ STDAPI DllRegisterServer()
 STDAPI DllUnregisterServer()
 {
     ATL::CRegKey reg;
-    LSTATUS result;
 
-    result = reg.Open(HKEY_LOCAL_MACHINE,
-                      L"Software\\Microsoft\\Windows\\CurrentVersion\\Shell "
-                      L"Extensions\\Approved",
-                      KEY_SET_VALUE);
+    LSTATUS result =
+        reg.Open(HKEY_LOCAL_MACHINE,
+                    L"Software\\Microsoft\\Windows\\CurrentVersion\\Shell "
+                    L"Extensions\\Approved",
+                    KEY_SET_VALUE);
 
     if (result == ERROR_SUCCESS)
     {
         reg.DeleteValue(L"{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}");
     }
 
-    HRESULT hr = AES_Crypt_Module.DllUnregisterServer(FALSE);
+    const HRESULT hr = AES_Crypt_Module.DllUnregisterServer(FALSE);
 
     return hr;
 }

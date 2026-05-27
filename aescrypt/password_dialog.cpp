@@ -16,13 +16,18 @@
  *      Windows specific code.
  */
 
-#include <algorithm>
 #include "pch.h"
+#include <Windows.h>
+#include <atlwin.h>
+#include <atlcore.h>
+#include <algorithm>
+#include <string>
+#include <wchar.h>
 #include <uxtheme.h>
-#include <vssym32.h>
+#include <vsstyle.h>
 #include "password_dialog.h"
 #include "secure_containers.h"
-#include "globals.h"
+#include "resource.h"
 
 /*
  *  PasswdDialog::PasswdDialog()
@@ -242,7 +247,7 @@ LRESULT PasswdDialog::OnInitDialog(UINT uMsg,
 LRESULT PasswdDialog::OnDrawItem([[maybe_unused]] UINT uMsg,
                                  WPARAM wParam,
                                  LPARAM lParam,
-                                 BOOL &bHandled)
+                                 BOOL &bHandled) const
 {
     // This function will only draw the button to reveal the password
     if (wParam != IDC_SHOWPASSWORD)
@@ -365,16 +370,16 @@ LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
                                   [[maybe_unused]] HWND hWndCtl,
                                   BOOL &bHandled)
 {
-    // Determine the length of the input
-    int password_length = static_cast<int>(
+    // Determine the length of the input (+ 1 for the \0 character)
+    const int password_length = static_cast<int>(
         std::max(SendDlgItemMessage(IDC_PASSWD, WM_GETTEXTLENGTH, 0, 0),
-                 LRESULT(0)));
+                 LRESULT(0))) +  1;
 
     // Reserve space for the password (+1 for null terminator)
-    password.resize(password_length + 1, L'\0');
+    password.resize(static_cast<std::size_t>(password_length), L'\0');
 
     // Retrieve the password from the dialog
-    GetDlgItemText(IDC_PASSWD, password.data(), password_length + 1);
+    GetDlgItemText(IDC_PASSWD, password.data(), password_length);
 
     // Determine the actual text length
     password.resize(wcslen(password.data()));
@@ -392,16 +397,17 @@ LRESULT PasswdDialog::OnClickedOK([[maybe_unused]] WORD wNotifyCode,
     // the conformation field matches
     if (encrypting)
     {
-        int password_confirm_length = static_cast<int>(std::max(
+        // Get the password confirmation length (+ 1 for the \0 character)
+        const int password_confirm_length = static_cast<int>(std::max(
             SendDlgItemMessage(IDC_PASSWDCONFIRM, WM_GETTEXTLENGTH, 0, 0),
-            LRESULT(0)));
+            LRESULT(0))) + 1;
 
-        SecureWString password_confirm(password_confirm_length + 1, L'\0');
+        SecureWString password_confirm(password_confirm_length, L'\0');
 
         // Retrieve the password confirmation from the dialog
         GetDlgItemText(IDC_PASSWDCONFIRM,
                        password_confirm.data(),
-                       password_confirm_length + 1);
+                       password_confirm_length);
 
         // Determine the actual text length
         password_confirm.resize(wcslen(password_confirm.data()));
@@ -582,7 +588,7 @@ void PasswdDialog::DeterminePasswordCharacter()
  *  Comments:
  *      None.
  */
-Terra::SecUtil::SecureWString PasswdDialog::GetPassword()
+SecureWString PasswdDialog::GetPassword() const
 {
     return password;
 }

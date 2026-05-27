@@ -1,7 +1,7 @@
 /*
  *  password_convert.cpp
  *
- *  Copyright (C) 2024, 2025
+ *  Copyright (C) 2024, 2025, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -20,8 +20,10 @@
  */
 
 #include <cstdint>
+#include <span>
 #include <terra/charutil/character_utilities.h>
 #include "password_convert.h"
+#include "secure_containers.h"
 
 /*
  *  PasswordConvertUTF8()

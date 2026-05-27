@@ -19,7 +19,11 @@
 #include "pch.h"
 #include <Windows.h>
 #include <VersionHelpers.h>
+#include <atlwin.h>
+#include <atlcore.h>
+#include <functional>
 #include "progress_dialog.h"
+#include "resource.h"
 
 /*
  *  ProgressDialog::ProgressDialog()

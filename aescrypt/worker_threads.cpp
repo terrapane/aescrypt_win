@@ -17,16 +17,26 @@
  */
 
 #include "pch.h"
+#include <Windows.h>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <istream>
+#include <ostream>
+#include <sstream>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 #include <limits>
 #include <chrono>
-#include <stdexcept>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <utility>
+#include <exception>
 #include <terra/aescrypt/engine/encryptor.h>
 #include <terra/aescrypt/engine/decryptor.h>
 #include <terra/aescrypt_lm/aescrypt_lm.h>
-#include <terra/charutil/character_utilities.h>
 #include <terra/bitutil/byte_order.h>
 #include "worker_threads.h"
 #include "mode.h"
@@ -36,6 +46,10 @@
 #include "password_convert.h"
 #include "has_aes_extension.h"
 #include "version.h"
+#include "globals.h"
+#include "resource.h"
+#include "file_list.h"
+#include "secure_containers.h"
 
 // Minimum frequency with which to update the progress meter
 constexpr std::chrono::milliseconds Progress_Update_Minimum(250);
@@ -422,12 +436,12 @@ void WorkerThreads::ThreadEntry()
     EnterCriticalSection(&critical_section);
 
     // Locate the data to be processed
-    auto it = std::find_if(requests.begin(),
-                           requests.end(),
-                           [thread_id](const RequestData &request)
-                           {
-                               return request.thread_id == thread_id;
-                           });
+    const auto it = std::find_if(requests.begin(),
+                                 requests.end(),
+                                 [thread_id](const RequestData &request)
+                                 {
+                                     return request.thread_id == thread_id;
+                                 });
 
     // If unable to find the thread ID, report the problem
     if (it == requests.end())
@@ -445,7 +459,7 @@ void WorkerThreads::ThreadEntry()
     }
 
     // Move the data from the deque to the local variable
-    RequestData request = std::move(*it);
+    const RequestData request = std::move(*it);
 
     // Remove this element from the deque
     requests.erase(it);
@@ -521,7 +535,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
     ProgressDialog progress_dialog(
         [&]()
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            const std::lock_guard<std::mutex> lock(mutex);
             cv.notify_all();
         });
 
@@ -535,7 +549,16 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
     };
 
     // Create an event used to indicate the progress dialog is ready
-    HANDLE event_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+    const HANDLE event_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    // If the event handle is zero, that's a problem
+    if (!event_handle)
+    {
+        ::ReportError(application_error,
+                      L"Windows failed to create an event handle",
+                      GetLastError());
+        return;
+    }
 
     // Create a thread to service the windows message loop for the dialog
     std::thread progress_thread(
@@ -611,11 +634,12 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
 
         if (!ifs.good() || !ifs.is_open())
         {
-            DWORD error_code = ERROR_SUCCESS;
-            if (!ifs.good()) error_code = GetLastError();
+            const DWORD error_code =
+                (!ifs.good()) ? GetLastError() : ERROR_SUCCESS;
 
             // Report an error opening the file
-            std::wstring message = L"Unable to open the input file " + in_file;
+            const std::wstring message =
+                L"Unable to open the input file " + in_file;
             ::ReportError(application_error, message, error_code);
 
             break;
@@ -625,12 +649,12 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
         ifs.rdbuf()->pubsetbuf(read_buffer.data(), read_buffer.size());
 
         // Define the output filename
-        std::wstring out_file = in_file + L".aes";
+        const std::wstring out_file = in_file + L".aes";
 
         try
         {
             // Get the file status of the output file
-            std::filesystem::file_status file_status =
+            const std::filesystem::file_status file_status =
                 std::filesystem::status(std::filesystem::path(out_file));
 
             // If the output file does not exist, attempt to remove later
@@ -681,7 +705,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
             if (!ofs.good()) error_code = GetLastError();
 
             // Report an error opening the file
-            std::wstring message =
+            const std::wstring message =
                 L"Unable to open the output file " + out_file;
             ::ReportError(application_error, message, error_code);
 
@@ -748,7 +772,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
     }
 
     // Instruct the progress window to terminate
-    DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
+    const DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
     PostThreadMessage(progress_thread_id, WM_QUIT, 0, 0);
 
     // Wait for the progress window thread to complete
@@ -831,7 +855,7 @@ std::pair<bool, std::string> WorkerThreads::EncryptStream(
                                 std::size_t position)
     {
         // Lock the mutex
-        std::lock_guard<std::mutex> lock(mutex);
+        const std::lock_guard<std::mutex> lock(mutex);
 
         // Dot not update if the input size is not known
         if (input_size == 0) return;
@@ -859,7 +883,7 @@ std::pair<bool, std::string> WorkerThreads::EncryptStream(
                 update_interval);
 
             // Lock the mutex to assign result
-            std::lock_guard<std::mutex> lock(mutex);
+            const std::lock_guard<std::mutex> lock(mutex);
             encryption_complete = true;
             cv.notify_all();
         });
@@ -982,12 +1006,21 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
     ProgressDialog progress_dialog(
         [&]()
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            const std::lock_guard<std::mutex> lock(mutex);
             cv.notify_all();
         });
 
     // Create an event used to indicate the progress dialog is ready
-    HANDLE event_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+    const HANDLE event_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    // If the event handle is zero, that's a problem
+    if (!event_handle)
+    {
+        ::ReportError(application_error,
+                      L"Windows failed to create an event handle",
+                      GetLastError());
+        return;
+    }
 
     // Create a thread to service the windows message loop for the dialog
     std::thread progress_thread(
@@ -1063,8 +1096,8 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
 
         if (!ifs.good() || !ifs.is_open())
         {
-            DWORD error_code = ERROR_SUCCESS;
-            if (!ifs.good()) error_code = GetLastError();
+            const DWORD error_code =
+                (!ifs.good()) ? GetLastError() : ERROR_SUCCESS;
 
             // Report an error opening the file
             std::wstring message = L"Unable to open the input file " + in_file;
@@ -1083,7 +1116,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
         try
         {
             // Get the file status of the output file
-            std::filesystem::file_status file_status =
+            const std::filesystem::file_status file_status =
                 std::filesystem::status(std::filesystem::path(out_file));
 
             // If the output file does not exist, attempt to remove later
@@ -1133,8 +1166,8 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
 
         if (!ofs.good() || !ofs.is_open())
         {
-            DWORD error_code = ERROR_SUCCESS;
-            if (!ofs.good()) error_code = GetLastError();
+            const DWORD error_code =
+                (!ofs.good()) ? GetLastError() : ERROR_SUCCESS;
 
             // Report an error opening the file
             std::wstring message =
@@ -1203,7 +1236,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
     }
 
     // Instruct the progress window to terminate
-    DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
+    const DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
     PostThreadMessage(progress_thread_id, WM_QUIT, 0, 0);
 
     // Wait for the progress window thread to complete
@@ -1278,7 +1311,7 @@ std::pair<bool, std::string> WorkerThreads::DecryptStream(
                                 std::size_t position)
     {
         // Lock the mutex
-        std::lock_guard<std::mutex> lock(mutex);
+        const std::lock_guard<std::mutex> lock(mutex);
 
         // Dot not update if the input size is not known
         if (input_size == 0) return;
@@ -1304,7 +1337,7 @@ std::pair<bool, std::string> WorkerThreads::DecryptStream(
                 update_interval);
 
             // Lock the mutex to assign result
-            std::lock_guard<std::mutex> lock(mutex);
+            const std::lock_guard<std::mutex> lock(mutex);
             decryption_complete = true;
             cv.notify_all();
         });

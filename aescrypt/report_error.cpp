@@ -16,6 +16,10 @@
  */
 
 #include "pch.h"
+#include <Windows.h>
+#include <tchar.h>
+#include <string>
+#include <cstdint>
 #include <terra/charutil/character_utilities.h>
 #include <terra/bitutil/byte_order.h>
 #include "report_error.h"

@@ -1,7 +1,7 @@
 /*
  *  has_aes_extension.cpp
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 #include "has_aes_extension.h"
 
 /*
@@ -44,13 +45,14 @@ bool HasAESExtension(const std::wstring &filename)
     try
     {
         // Get the file extension from the filename
-        auto extension = std::filesystem::path(filename).extension().wstring();
+        const std::wstring extension =
+            std::filesystem::path(filename).extension().wstring();
 
         // If the extension is not exactly 4 characters (.aes), return false
         if (extension.length() != 4) return false;
 
         // Compare each of the last 4 characters looking for .aes
-        if ((extension[0] == L'.') &&
+        if ( (extension[0] == L'.') &&
             ((extension[1] == L'a') || (extension[1] == L'A')) &&
             ((extension[2] == L'e') || (extension[2] == L'E')) &&
             ((extension[3] == L's') || (extension[3] == L'S')))

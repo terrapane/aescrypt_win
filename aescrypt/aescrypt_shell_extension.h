@@ -1,7 +1,7 @@
 /*
  *  aescrypt_shell_extension.h
  *
- *  Copyright (C) 2006, 2008, 2013, 2024
+ *  Copyright (C) 2006-2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -18,9 +18,14 @@
 #pragma once
 
 #include <Windows.h>
-#include <shlobj.h>
+#include <ShObjidl_core.h>
+#include <shtypes.h>
+#include <atlcom.h>
+#include <atldef.h>
+#include <atlbase.h>
 #include "resource.h"
 #include "file_list.h"
+#include "aescrypt.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -42,7 +47,7 @@ class ATL_NO_VTABLE AESCryptShellExtension :
 
         // IContextMenu
 #ifdef _M_X64
-        STDMETHOD(GetCommandString)(UINT_PTR, UINT, UINT*, LPSTR, UINT);
+        STDMETHOD(GetCommandString)(UINT_PTR, UINT, UINT *, LPSTR, UINT);
 #else
         STDMETHOD(GetCommandString)(UINT, UINT, UINT*, LPSTR, UINT);
 #endif
