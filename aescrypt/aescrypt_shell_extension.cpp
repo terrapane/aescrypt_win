@@ -22,6 +22,7 @@
 #include <atldef.h>
 #include <atlbase.h>
 #include <shtypes.h>
+#include <Shellapi.h>
 #include <ShObjIdl_core.h>
 #include <wchar.h>
 #include <string>

@@ -24,11 +24,13 @@
 
 #include "pch.h"
 #include <Windows.h>
+#include <shellapi.h>
 #include <tchar.h>
 #include <string>
 #include "mode.h"
 #include "file_list.h"
 #include "aescrypt_launcher.h"
+#include "resource.h"
 
 // Windows Callback Procedure
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

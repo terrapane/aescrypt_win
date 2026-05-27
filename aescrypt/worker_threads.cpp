@@ -18,6 +18,8 @@
 
 #include "pch.h"
 #include <Windows.h>
+#include <atlbase.h>
+#include <shellapi.h>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>

@@ -1,5 +1,6 @@
-// stdafx.cpp : source file that includes just the standard includes
-// aescrypt_launcher.pch will be the pre-compiled header
-// stdafx.obj will contain the pre-compiled type information
+// pch.cpp: source file corresponding to the pre-compiled header
 
 #include "pch.h"
+
+// When you are using pre-compiled headers, this source file is necessary for
+// compilation to succeed.

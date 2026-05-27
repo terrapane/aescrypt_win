@@ -18,6 +18,7 @@
 
 #include "pch.h"
 #include <Windows.h>
+#include <atlbase.h>
 #include <atlwin.h>
 #include <atlcore.h>
 #include <algorithm>
