@@ -20,7 +20,6 @@
 #include "pch.h"
 #include <Windows.h>
 #include <atlbase.h>
-#include "framework.h"
 #include "resource.h"
 #include "aescrypt.h"
 #include "worker_threads.h"
