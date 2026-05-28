@@ -258,7 +258,7 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, AESCryptMode mode)
     PasswdDialog password_dialog(application_name);
 
     // Verify user license rights
-    if (!Terra::ACLM::ValidateACLM())
+    if (!AESCRYPT_LICENSE_VALID)
     {
         if (MessageBox(NULL,
                        L"A valid license is required to use AES Crypt. You "
