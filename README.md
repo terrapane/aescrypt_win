@@ -50,4 +50,5 @@ following the balance of the instructions.
 8. Select Release and x64 from the build configuration settings at the
    top of the Visual Studio IDE.
 9. Select Build->Build Solution.  This will build the AES Crypt for Windows
-   with an output aescrypt.msi in the Setup\Release folder.
+   with an output aescrypt_gui-x.y.z.msi in the Setup\Release folder, where
+   x.y.z refer to the version number of the build.
