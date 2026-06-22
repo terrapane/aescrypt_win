@@ -1,11 +1,9 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by aescrypt.rc
-//
+
 #define IDS_APP_TITLE                   100
 
 #define IDR_AESCRYPT                    201
-#define IDR_AESCRYPTSHELLEXTENSION      202
+#define IDR_AESCRYPT_CONTEXT_MENU       202
 
 #define IDD_PASSWDDIALOG                203
 #define IDD_PROGRESSDIALOG              204
@@ -27,7 +25,7 @@
 #define IDC_SHOWPASSWORD                307
 
 // Next default values for new objects
-//
+
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        210

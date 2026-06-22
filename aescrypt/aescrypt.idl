@@ -1,7 +1,7 @@
 /*
  *  aescrypt.idl
  *
- *  Copyright (C) 2024
+ *  Copyright (C) 2024, 2026
  *  Terrapane Corporation
  *  All Rights Reserved
  *
@@ -9,7 +9,7 @@
  *      Paul E. Jones <paulej@packetizer.com>
  *
  *  Description:
- *      IDL source for AES Crypt the defines the shell extension interface.
+ *      IDL source for AES Crypt the defines the context menu interface.
  *
  *  Portability Issues:
  *      None.
@@ -24,25 +24,25 @@ import "ocidl.idl";
 [
     object,
     uuid(3E228AAF-683B-44AD-A8DA-3FC8EF25008A),
-    helpstring("IAECryptShellExtension Interface"),
+    helpstring("IAECryptContextMenu Interface"),
     pointer_default(unique)
 ]
-interface IAESCryptShellExtension : IUnknown{
+interface IAESCryptContextMenu : IUnknown{
 };
 [
     uuid(EB9FFF86-F4EC-4882-B45E-90C4EB1ECC07),
     version(4.0),
-    helpstring("AES Crypt Type Library")
+    helpstring("AES Crypt Shell Extension Type Library")
 ]
 library AESCryptLib
 {
     importlib("stdole2.tlb");
     [
         uuid(35872D53-3BD4-45FA-8DB5-FFC47D4235E7),
-        helpstring("AESCryptShellExtensionCom Class")
+        helpstring("AESCryptContextMenuCom Class")
     ]
-    coclass AESCryptShellExtensionCom
+    coclass AESCryptContextMenuCom
     {
-        [default] interface IAESCryptShellExtension;
+        [default] interface IAESCryptContextMenu;
     };
 };

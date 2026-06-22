@@ -327,7 +327,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aescrypt.cpp" />
-    <ClCompile Include="aescrypt_shell_extension.cpp" />
+    <ClCompile Include="aescrypt_context_menu.cpp" />
     <ClCompile Include="worker_threads.cpp" />
     <ClCompile Include="report_error.cpp" />
     <ClCompile Include="has_aes_extension.cpp">
@@ -364,14 +364,14 @@
   <ItemGroup>
     <None Include="aescrypt.def" />
     <None Include="aescrypt.rgs" />
-    <None Include="aescrypt_shell_extension.rgs" />
+    <None Include="aescrypt_context_menu.rgs" />
     <None Include="ctxbitmap.bmp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="aescrypt.idl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aescrypt_shell_extension.h" />
+    <ClInclude Include="aescrypt_context_menu.h" />
     <ClInclude Include="include\file_list.h" />
     <ClInclude Include="include\mode.h" />
     <ClInclude Include="worker_threads.h" />

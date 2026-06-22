@@ -1,5 +1,5 @@
 /*
- *  aescrypt_shell_extension.cpp
+ *  aescrypt_context_menu.cpp
  *
  *  Copyright (C) 2006-2026
  *  Terrapane Corporation
@@ -10,7 +10,7 @@
  *
  *  Description:
  *      This file implements the C++ class for integrating with the Windows
- *      shell.
+ *      shell to provide the AES Crypt context menu.
  *
  *  Portability Issues:
  *      Windows specific code.
@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "aescrypt_shell_extension.h"
+#include "aescrypt_context_menu.h"
 #include "worker_threads.h"
 #include "mode.h"
 #include "has_aes_extension.h"
@@ -38,7 +38,7 @@
 extern WorkerThreads Worker_Threads;
 
 /*
- *  AESCryptShellExtension::AESCryptShellExtension()
+ *  AESCryptContextMenu::AESCryptContextMenu()
  *
  *  Description:
  *     The class constructor loads a bitmap and performs other initialization
@@ -53,7 +53,7 @@ extern WorkerThreads Worker_Threads;
  *  Comments:
  *      None.
  */
-AESCryptShellExtension::AESCryptShellExtension() :
+AESCryptContextMenu::AESCryptContextMenu() :
     context_bitmap{},
     aes_files{},
     non_aes_files{}
@@ -72,10 +72,10 @@ AESCryptShellExtension::AESCryptShellExtension() :
 }
 
 /*
- *  AESCryptShellExtension::~AESCryptShellExtension()
+ *  AESCryptContextMenu::~AESCryptContextMenu()
  *
  *  Description:
- *     Destructor for the AESCryptShellExtension, which only needs to destroy
+ *     Destructor for the AESCryptContextMenu, which only needs to destroy
  *     the bitmap (if it exists).
  *
  *  Parameters:
@@ -87,14 +87,14 @@ AESCryptShellExtension::AESCryptShellExtension() :
  *  Comments:
  *      None.
  */
-AESCryptShellExtension::~AESCryptShellExtension()
+AESCryptContextMenu::~AESCryptContextMenu()
 {
     // Free the bitmap object if it was loaded
     if (context_bitmap != NULL) DeleteObject(context_bitmap);
 }
 
 /*
- *  AESCryptShellExtension::Initialize()
+ *  AESCryptContextMenu::Initialize()
  *
  *  Description:
  *      This function is called to initialize the context menu.  At this point,
@@ -118,7 +118,7 @@ AESCryptShellExtension::~AESCryptShellExtension()
  *  Comments:
  *      None.
  */
-HRESULT AESCryptShellExtension::Initialize(
+HRESULT AESCryptContextMenu::Initialize(
                                     [[maybe_unused]] LPCITEMIDLIST pidlFolder,
                                     LPDATAOBJECT pDO,
                                     [[maybe_unused]] HKEY hProgID)
@@ -259,7 +259,7 @@ HRESULT AESCryptShellExtension::Initialize(
 }
 
 /*
- *  AESCryptShellExtension::QueryContextMenu()
+ *  AESCryptContextMenu::QueryContextMenu()
  *
  *  Description:
  *      This function will render the context menu when called by the Windows
@@ -287,7 +287,7 @@ HRESULT AESCryptShellExtension::Initialize(
  *  Comments:
  *      None.
  */
-HRESULT AESCryptShellExtension::QueryContextMenu(HMENU hMenu,
+HRESULT AESCryptContextMenu::QueryContextMenu(HMENU hMenu,
                                                  UINT uMenuIndex,
                                                  UINT uidFirstCmd,
                                                  [[maybe_unused]] UINT uidLastCmd,
@@ -339,7 +339,7 @@ HRESULT AESCryptShellExtension::QueryContextMenu(HMENU hMenu,
 }
 
 /*
- *  AESCryptShellExtension::GetCommandString()
+ *  AESCryptContextMenu::GetCommandString()
  *
  *  Description:
  *      This function provides help information.
@@ -367,10 +367,10 @@ HRESULT AESCryptShellExtension::QueryContextMenu(HMENU hMenu,
  *      None.
  */
 #ifdef _M_X64
-HRESULT AESCryptShellExtension::GetCommandString(
+HRESULT AESCryptContextMenu::GetCommandString(
                                             UINT_PTR idCmd,
 #else
-HRESULT AESCryptShellExtension::GetCommandString(
+HRESULT AESCryptContextMenu::GetCommandString(
                                             UINT idCmd,
 #endif
                                             UINT uType,
@@ -440,7 +440,7 @@ HRESULT AESCryptShellExtension::GetCommandString(
 }
 
 /*
- *  AESCryptShellExtension::InvokeCommand()
+ *  AESCryptContextMenu::InvokeCommand()
  *
  *  Description:
  *      This function will start the work of encrypting or decrypting when
@@ -456,7 +456,7 @@ HRESULT AESCryptShellExtension::GetCommandString(
  *  Comments:
  *      None.
  */
-HRESULT AESCryptShellExtension::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
+HRESULT AESCryptContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
 {
     // If lpVerb really points to a string, ignore this function call
     if (HIWORD(pInfo->lpVerb) != 0) return E_INVALIDARG;

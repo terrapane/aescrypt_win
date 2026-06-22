@@ -87,8 +87,10 @@ STDAPI DllRegisterServer()
 
     if (result!= ERROR_SUCCESS) return E_ACCESSDENIED;
 
+    // Register the content menu so that File Explorer will make the menu
+    // available when right-clicking on a file
     result = reg.SetStringValue(L"{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}",
-                                L"aescrypt");
+                                L"aescrypt_context_menu");
 
     if (result != ERROR_SUCCESS) return HRESULT_FROM_WIN32(result);
 
@@ -108,6 +110,7 @@ STDAPI DllUnregisterServer()
 
     if (result == ERROR_SUCCESS)
     {
+        // Remove the entry for the AES Crypt context menu from the registry
         reg.DeleteValue(L"{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}");
     }
 
