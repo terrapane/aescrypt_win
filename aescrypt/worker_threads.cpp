@@ -62,7 +62,7 @@ constexpr std::size_t Minimal_Interval = 16 * 100;
 namespace
 {
 
-std::wstring Application_Name = L"AES Crypt";
+const std::wstring Application_Name = L"AES Crypt";
 
 /*
  *  ThreadEntry()
@@ -141,9 +141,6 @@ WorkerThreads::WorkerThreads() : thread_count{0}
                        application_name.data(),
                        static_cast<int>(application_name.size()));
         application_name.resize(title_length);
-
-        // Free the library
-        FreeLibrary(hModule);
     }
     else
     {
@@ -152,8 +149,6 @@ WorkerThreads::WorkerThreads() : thread_count{0}
     }
 
     application_error = application_name + L" Error";
-
-    InitializeCriticalSection(&critical_section);
 }
 
 /*
@@ -173,26 +168,24 @@ WorkerThreads::WorkerThreads() : thread_count{0}
  */
 WorkerThreads::~WorkerThreads()
 {
+    std::unique_lock<std::mutex> lock(module_mutex);
+
     // Wait for any active threads to complete
     // NOTE: This block of code should never have to wait, since the IsBusy()
     //       call should be made and the object should not be destroyed.
     while (true)
     {
-        EnterCriticalSection(&critical_section);
-        if (thread_count == 0)
-        {
-            LeaveCriticalSection(&critical_section);
-            break;
-        }
-        LeaveCriticalSection(&critical_section);
-        Sleep(200);
+        if (thread_count == 0) break;
+        lock.unlock();
+        Sleep(250);
+        lock.lock();
     }
+
+    // Unlock the mutex since CloseThreadHandles() will lock it
+    lock.unlock();
 
     // Close any completed thread handles
     CloseThreadHandles();
-
-    // Destroy the critical section object
-    DeleteCriticalSection(&critical_section);
 }
 
 /*
@@ -214,20 +207,12 @@ WorkerThreads::~WorkerThreads()
  */
 bool WorkerThreads::IsBusy()
 {
-    bool busy = false;
-
     // Close any completed thread handles
     CloseThreadHandles();
 
-    // Enter the critical section
-    EnterCriticalSection(&critical_section);
+    std::lock_guard<std::mutex> lock(module_mutex);
 
-    // If there are active threads, indicate busy
-    if (thread_count > 0) busy = true;
-
-    LeaveCriticalSection(&critical_section);
-
-    return busy;
+    return (thread_count > 0);
 }
 
 /*
@@ -313,23 +298,22 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, AESCryptMode mode)
  *      Nothing.
  *
  *  Comments:
- *      This function will enter the critical section, so ensure it is not
- *      entered before calling this routine.
+ *      This function will lock and unlock the mutex, so it should not be
+ *      locked by the caller.
  */
 void WorkerThreads::CloseThreadHandles()
 {
-    // Enter the critical section
-    EnterCriticalSection(&critical_section);
+    std::unique_lock<std::mutex> lock(module_mutex);
 
     // Close the handles of any terminated threads
     while (!terminated_threads.empty())
     {
         // Pull the thread handle from the front
-        auto thread_handle = terminated_threads.front();
+        HANDLE thread_handle = terminated_threads.front();
         terminated_threads.pop_front();
 
-        // Leave the critical section
-        LeaveCriticalSection(&critical_section);
+        // Unlock the mutex
+        lock.unlock();
 
         // Wait for the thread to exit (should be already)
         WaitForSingleObject(thread_handle, INFINITE);
@@ -337,46 +321,43 @@ void WorkerThreads::CloseThreadHandles()
         // Close the thread handle
         CloseHandle(thread_handle);
 
-        // Re-enter the critical section
-        EnterCriticalSection(&critical_section);
+        // Re-lock the mutex
+        lock.lock();
     }
-
-    // Leave the critical section
-    LeaveCriticalSection(&critical_section);
 }
 
- /*
-  *  WorkerThreads::StartThread()
-  *
-  *  Description:
-  *      This function is called after the user provides a password to start
-  *      a new thread to process the file list.
-  *
-  *  Parameters:
-  *      file_list [in]
-  *         The list of files to encrypt or decrypt.
-  *
-  *      password [in]
-  *         The password to use for encrypting or decrypting.
-  *
+/*
+ *  WorkerThreads::StartThread()
+ *
+ *  Description:
+ *      This function is called after the user provides a password to start
+ *      a new thread to process the file list.
+ *
+ *  Parameters:
+ *      file_list [in]
+ *         The list of files to encrypt or decrypt.
+ *
+ *      password [in]
+ *         The password to use for encrypting or decrypting.
+ *
  *      mode [in]
  *          Operational mode indicating encryption or decryption.
  *
-  *  Returns:
-  *      Nothing.
-  *
-  *  Comments:
-  *      None.
-  */
+ *  Returns:
+ *      Nothing.
+ *
+ *  Comments:
+ *      None.
+ */
 void WorkerThreads::StartThread(const FileList &file_list,
                                 const SecureU8String &password,
                                 AESCryptMode mode)
 {
     DWORD thread_id;
 
-    // Enter the critical section so that the thread will be held up until
-    // the worker_data
-    EnterCriticalSection(&critical_section);
+    // Lock the module mutex so that the created thread will be held up until
+    // after the thread info gets added to "requests" deque
+    std::unique_lock<std::mutex> lock(module_mutex);
 
     // Create the thread
     HANDLE thread_handle =
@@ -397,16 +378,12 @@ void WorkerThreads::StartThread(const FileList &file_list,
         // Increase the internal thread counter
         thread_count++;
 
-        // Let the thread in
-        LeaveCriticalSection(&critical_section);
+        return;
     }
-    else
-    {
-        // Leave the critical section
-        LeaveCriticalSection(&critical_section);
 
-        ::ReportError(application_error, L"Thread creation failed");
-    }
+    // Unlock the mutex so the module is not blocked reporting an error
+    lock.unlock();
+    ::ReportError(application_error, L"Thread creation failed");
 }
 
 /*
@@ -434,8 +411,8 @@ void WorkerThreads::ThreadEntry()
     // Determine the thread ID of this thread
     DWORD thread_id = GetCurrentThreadId();
 
-    // Try to enter the critical section
-    EnterCriticalSection(&critical_section);
+    // Lock the module mutex
+    std::unique_lock<std::mutex> lock(module_mutex);
 
     // Locate the data to be processed
     const auto it = std::find_if(requests.begin(),
@@ -448,15 +425,14 @@ void WorkerThreads::ThreadEntry()
     // If unable to find the thread ID, report the problem
     if (it == requests.end())
     {
-        // Leave the critical section while reporting the issue
-        LeaveCriticalSection(&critical_section);
+        // Unlock the mutex to not block the module while reporting an error
+        lock.unlock();
 
         ::ReportError(application_error, L"Thread rendezvous failed");
 
-        // Reduce the thread count and return
-        EnterCriticalSection(&critical_section);
+        // Re-lock the mutex and reduce the thread count
+        lock.lock();
         thread_count--;
-        LeaveCriticalSection(&critical_section);
         return;
     }
 
@@ -466,8 +442,8 @@ void WorkerThreads::ThreadEntry()
     // Remove this element from the deque
     requests.erase(it);
 
-    // Leave the critical section since necessary data is now local
-    LeaveCriticalSection(&critical_section);
+    // Unlock the mutex while doing the bulk of the work
+    lock.unlock();
 
     try
     {
@@ -494,10 +470,9 @@ void WorkerThreads::ThreadEntry()
     }
 
     // Once done, decrement the thread count, clean up memory, etc.
-    EnterCriticalSection(&critical_section);
+    lock.lock();
     thread_count--;
     terminated_threads.push_back(request.thread_handle);
-    LeaveCriticalSection(&critical_section);
 }
 
 /*

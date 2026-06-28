@@ -24,9 +24,4 @@
 
 #pragma once
 
-#include "file_list.h"
-#include "mode.h"
-
-// Externals in the aescrypt DLL
-bool AESLibraryBusy();
-void ProcessFiles(FileList &file_list, AESCryptMode mode);
+// No definitions required

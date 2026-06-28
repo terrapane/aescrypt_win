@@ -20,7 +20,7 @@ set(AUTHOR_TEXT    "Terrapane Corporation")
 configure_file(version.h.in version.h @ONLY)
 configure_file(version.rc.in version.rc @ONLY)
 
-# Due to change Microsoft introduced, the MSVC runtime libraries can cause
+# Due to a change Microsoft introduced, the MSVC runtime libraries can cause
 # a crash when using std::mutex unless the user has the latest C++ libraries
 # from Microsoft.  The following side-steps this problem. See:
 # https://developercommunity.visualstudio.com/t/Access-violation-in-_Thrd_yield-after-up/10664660#T-N10668856

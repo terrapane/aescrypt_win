@@ -24,6 +24,7 @@
 #include <condition_variable>
 #include <utility>
 #include <cstdint>
+#include <cstddef>
 #include <string>
 #include <vector>
 #include <ostream>
@@ -99,8 +100,8 @@ class WorkerThreads
 
         std::wstring application_name;
         std::wstring application_error;
-        int thread_count;
+        std::size_t thread_count;
         std::deque<HANDLE> terminated_threads;
         std::deque<RequestData> requests;
-        CRITICAL_SECTION critical_section;
+        std::mutex module_mutex;
 };

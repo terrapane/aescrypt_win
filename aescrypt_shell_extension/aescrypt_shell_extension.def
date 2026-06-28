@@ -1,6 +1,6 @@
-; aescrypt.def : Declares the module name and exports
+; aescrypt_shell_extension.def : Declares the module name and exports
 
-LIBRARY "aescrypt.dll"
+LIBRARY "aescrypt_shell_extension.dll"
 
 EXPORTS
     DllCanUnloadNow     PRIVATE

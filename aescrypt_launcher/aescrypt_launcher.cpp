@@ -31,6 +31,10 @@
 #include "file_list.h"
 #include "aescrypt_launcher.h"
 #include "resource.h"
+#include "aescrypt.h"
+
+namespace
+{
 
 // Windows Callback Procedure
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -47,6 +51,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
+
+} // namespace
 
 // Main Procedure for Windows
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
@@ -71,7 +77,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     application_name.resize(title_length);
 
     // Get the command-line argument string
-    LPWSTR *szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+    LPWSTR *szArglist = CommandLineToArgvW(GetCommandLine(), &nArgs);
     if(szArglist == NULL) return 0;
 
     // Create the window class and application window (hidden)

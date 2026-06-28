@@ -27,8 +27,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C8D85035-5ED5-4ADE-A9E0-5371E3B91285}</ProjectGuid>
-    <RootNamespace>aescrypt</RootNamespace>
+    <ProjectGuid>{590843D1-840A-4653-8670-37770D9A356C}</ProjectGuid>
+    <RootNamespace>aescrypt_shell_extension</RootNamespace>
     <Keyword>AtlProj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -103,9 +103,22 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
+      <TypeLibraryName>$(IntDir)aescrypt_shell_extension.tlb</TypeLibraryName>
+      <HeaderFileName>aescrypt_shell_extension.h</HeaderFileName>
+      <DllDataFileName>
+      </DllDataFileName>
+      <InterfaceIdentifierFileName>aescrypt_shell_extension_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>aescrypt_shell_extension_p.c</ProxyFileName>
+      <ValidateAllParameters>false</ValidateAllParameters>
+    </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>AESCRYPT_EXPORTS;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -113,7 +126,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)aescrypt\include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -125,6 +138,7 @@
     <Link>
       <RegisterOutput>false</RegisterOutput>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27X86%27 publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <ModuleDefinitionFile>.\aescrypt_shell_extension.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <DataExecutionPrevention>
@@ -135,9 +149,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
+      <TypeLibraryName>$(IntDir)aescrypt_shell_extension.tlb</TypeLibraryName>
+      <HeaderFileName>aescrypt_shell_extension.h</HeaderFileName>
+      <DllDataFileName>
+      </DllDataFileName>
+      <InterfaceIdentifierFileName>aescrypt_shell_extension_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>aescrypt_shell_extension_p.c</ProxyFileName>
+    </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>AESCRYPT_EXPORTS;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;_DEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -145,7 +171,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)aescrypt\include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -156,6 +182,7 @@
     <Link>
       <RegisterOutput>false</RegisterOutput>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27amd64%27 publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <ModuleDefinitionFile>.\aescrypt_shell_extension.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <DataExecutionPrevention>
@@ -172,16 +199,29 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
+      <TypeLibraryName>$(IntDir)aescrypt_shell_extension.tlb</TypeLibraryName>
+      <HeaderFileName>aescrypt_shell_extension.h</HeaderFileName>
+      <DllDataFileName>
+      </DllDataFileName>
+      <InterfaceIdentifierFileName>aescrypt_shell_extension_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>aescrypt_shell_extension_p.c</ProxyFileName>
+      <ValidateAllParameters>false</ValidateAllParameters>
+    </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>AESCRYPT_EXPORTS;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)aescrypt\include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -192,6 +232,7 @@
     <Link>
       <RegisterOutput>false</RegisterOutput>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27X86%27 publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <ModuleDefinitionFile>.\aescrypt_shell_extension.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -204,16 +245,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
+      <TargetEnvironment>X64</TargetEnvironment>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
+      <TypeLibraryName>$(IntDir)aescrypt_shell_extension.tlb</TypeLibraryName>
+      <HeaderFileName>aescrypt_shell_extension.h</HeaderFileName>
+      <DllDataFileName>
+      </DllDataFileName>
+      <InterfaceIdentifierFileName>aescrypt_shell_extension_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>aescrypt_shell_extension_p.c</ProxyFileName>
+    </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>AESCRYPT_EXPORTS;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;NOMINMAX;WIN32_LEAN_AND_MEAN;WIN32;_WIN32_WINNT=0x0A00;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)aescrypt\include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <TreatWarningAsError>true</TreatWarningAsError>
@@ -226,6 +279,7 @@
     <Link>
       <RegisterOutput>false</RegisterOutput>
       <AdditionalManifestDependencies>type=%27win32%27 name=%27Microsoft.Windows.Common-Controls%27 version=%276.0.0.0%27 processorArchitecture=%27amd64%27 publicKeyToken=%276595b64144ccf1df%27 language=%27*%27;%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
+      <ModuleDefinitionFile>.\aescrypt_shell_extension.def</ModuleDefinitionFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -248,7 +302,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)aescrypt\include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -262,7 +316,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)aescrypt\include;$(SolutionDir)\out\build\$(Platform)-$(Configuration);$(SolutionDir)\out\install\$(Platform)-$(Configuration)\include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalOptions>/Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -272,21 +326,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aescrypt.cpp" />
-    <ClCompile Include="worker_threads.cpp" />
-    <ClCompile Include="report_error.cpp" />
+    <ClCompile Include="aescrypt_shell_extension.cpp" />
+    <ClCompile Include="aescrypt_context_menu.cpp" />
+    <ClCompile Include="aescrypt_interface.cpp" />
     <ClCompile Include="has_aes_extension.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="password_dialog.cpp" />
-    <ClCompile Include="password_convert.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -294,39 +341,45 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="progress_dialog.cpp" />
+    <ClCompile Include="aescrypt_shell_extension_i.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\aescrypt.h" />
-    <ClInclude Include="include\file_list.h" />
-    <ClInclude Include="include\mode.h" />
-    <ClInclude Include="worker_threads.h" />
-    <ClInclude Include="report_error.h" />
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="globals.h" />
+    <None Include="aescrypt_shell_extension.def" />
+    <None Include="aescrypt_shell_extension.rgs" />
+    <None Include="aescrypt_context_menu.rgs" />
+    <None Include="ctxbitmap.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="aescrypt_shell_extension.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aescrypt_context_menu.h" />
+    <ClInclude Include="aescrypt_interface.h" />
     <ClInclude Include="has_aes_extension.h" />
-    <ClInclude Include="password_dialog.h" />
-    <ClInclude Include="password_convert.h" />
+    <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="progress_dialog.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="secure_containers.h" />
+    <ClInclude Include="aescrypt_shell_extension.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="aescrypt.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="aescrypt_document.ico" />
-    <Image Include="aescrypt_lock.ico" />
-    <Image Include="eye_visible.ico" />
-    <Image Include="eye_hidden.ico" />
+    <ResourceCompile Include="aescrypt_shell_extension.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="aescrypt.rc" />
+      <UserProperties RESOURCE_FILE="aescrypt_shell_extension.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

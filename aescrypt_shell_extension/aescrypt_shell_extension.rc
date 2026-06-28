@@ -68,11 +68,11 @@ BEGIN
         BEGIN
             VALUE "Comments", "AES Crypt - Advanced File Encryption for Windows"
             VALUE "CompanyName", AUTHOR_STR
-            VALUE "FileDescription", "AES Crypt Core Library"
+            VALUE "FileDescription", "AES Crypt Shell Extension Library"
             VALUE "FileVersion", VER_FILEVERSION_STR
-            VALUE "InternalName", "aescrypt.dll"
+            VALUE "InternalName", "aescrypt_shell_extension.dll"
             VALUE "LegalCopyright", COPYRIGHT_STR
-            VALUE "OriginalFilename", "aescrypt.dll"
+            VALUE "OriginalFilename", "aescrypt_shell_extension.dll"
             VALUE "ProductName", "AES Crypt"
             VALUE "ProductVersion", VER_PRODUCTVERSION_STR
         END
@@ -86,93 +86,20 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Icon
+// REGISTRY
 //
 
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_AESCRYPT_PAPER      ICON                    "aescrypt_paper.ico"
+IDR_AESCRYPT_SHELL_EXTENSION    REGISTRY        "aescrypt_shell_extension.rgs"
 
-IDI_AESCRYPT_LOCK       ICON                    "aescrypt_lock.ico"
-
-IDI_EYE_VISIBLE         ICON                    "eye_visible.ico"
-
-IDI_EYE_HIDDEN          ICON                    "eye_hidden.ico"
+IDR_AESCRYPT_CONTEXT_MENU       REGISTRY        "aescrypt_context_menu.rgs"
 
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Dialog
+// Bitmap
 //
 
-IDD_PASSWDDIALOG DIALOGEX 0, 0, 296, 68
-STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "AES Crypt Password"
-FONT 8, "MS Shell Dlg", 400, 0, 0x0
-BEGIN
-    LTEXT           "Enter password",IDC_ENTERPASSWD,7,7,207,8
-    EDITTEXT        IDC_PASSWD,6,18,208,15,ES_PASSWORD | ES_AUTOHSCROLL
-    LTEXT           "Confirm password",IDC_ENTERPASSWDCONFIRM,7,36,207,8
-    EDITTEXT        IDC_PASSWDCONFIRM,6,47,208,15,ES_PASSWORD | ES_AUTOHSCROLL
-    CONTROL         "",IDC_SHOWPASSWORD,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP,216,17,16,16
-    DEFPUSHBUTTON   "OK",IDOK,241,17,50,16
-    PUSHBUTTON      "Cancel",IDCANCEL,241,36,50,16
-END
-
-IDD_PROGRESSDIALOG DIALOGEX 0, 0, 280, 87
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_APPWINDOW
-CAPTION "AES Crypt Progress"
-FONT 8, "MS Shell Dlg", 400, 0, 0x0
-BEGIN
-    PUSHBUTTON      "Cancel",IDCANCEL,223,65,50,16
-    CONTROL         "",IDC_PROGRESSBAR,"msctls_progress32",WS_BORDER,7,48,265,10
-    LTEXT           "",IDC_ENCRYPTINGMSG,7,7,265,8
-    LTEXT           "",IDC_FILENAME,7,16,265,25,SS_PATHELLIPSIS
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_PASSWDDIALOG, DIALOG
-    BEGIN
-        LEFTMARGIN, 6
-        RIGHTMARGIN, 290
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 61
-    END
-
-    IDD_PROGRESSDIALOG, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 273
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 80
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_PASSWDDIALOG AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_PROGRESSDIALOG AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
+IDB_CTXBITMAP           BITMAP                  "ctxbitmap.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -187,7 +114,6 @@ END
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifndef APSTUDIO_INVOKED

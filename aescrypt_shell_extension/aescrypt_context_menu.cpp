@@ -28,14 +28,11 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include "aescrypt_interface.h"
 #include "aescrypt_context_menu.h"
-#include "worker_threads.h"
 #include "mode.h"
 #include "has_aes_extension.h"
 #include "resource.h"
-
-// Make the global worker thread object visible in this module
-extern WorkerThreads Worker_Threads;
 
 /*
  *  AESCryptContextMenu::AESCryptContextMenu()
@@ -288,10 +285,10 @@ HRESULT AESCryptContextMenu::Initialize(
  *      None.
  */
 HRESULT AESCryptContextMenu::QueryContextMenu(HMENU hMenu,
-                                                 UINT uMenuIndex,
-                                                 UINT uidFirstCmd,
-                                                 [[maybe_unused]] UINT uidLastCmd,
-                                                 UINT uFlags)
+                                              UINT uMenuIndex,
+                                              UINT uidFirstCmd,
+                                              [[maybe_unused]] UINT uidLastCmd,
+                                              UINT uFlags)
 {
     // If the flags include CMF_DEFAULTONLY, do nothing
     if (uFlags & CMF_DEFAULTONLY)
@@ -383,7 +380,7 @@ HRESULT AESCryptContextMenu::GetCommandString(
     // There is only one command, so the idCmd should always be 0
     if (idCmd != 0)
     {
-        ATLASSERT(idCmd != 0);                           // should never get here
+        ATLASSERT(idCmd != 0);                  // should never get here
         return E_INVALIDARG;
     }
 
@@ -401,9 +398,9 @@ HRESULT AESCryptContextMenu::GetCommandString(
             }
 
             // Copy the help text into the supplied buffer
-            if (!lstrcpynW(reinterpret_cast<PWSTR>(szName),
-                           command_text,
-                           cchMax))
+            if (!lstrcpyn(reinterpret_cast<PWSTR>(szName),
+                          command_text,
+                          cchMax))
             {
                 return E_FAIL;
             }
@@ -421,9 +418,9 @@ HRESULT AESCryptContextMenu::GetCommandString(
             }
 
             // Copy the verb text into the supplied buffer
-            if (!lstrcpynW(reinterpret_cast<PWSTR>(szName),
-                           command_text,
-                           cchMax))
+            if (!lstrcpyn(reinterpret_cast<PWSTR>(szName),
+                          command_text,
+                          cchMax))
             {
                 return E_FAIL;
             }
@@ -472,7 +469,7 @@ HRESULT AESCryptContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
         (aes_files) ? AESCryptMode::Decrypt : AESCryptMode::Encrypt;
 
     // The menu item was invoked, so process the list of files
-    Worker_Threads.ProcessFiles(file_list, mode);
+    GetAESCryptInterface().ProcessFiles(file_list, mode);
 
     // Clear the file list
     file_list.clear();

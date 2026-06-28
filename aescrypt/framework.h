@@ -1,8 +1,5 @@
 #pragma once
 
-// Controls the default COM threading model for ATL modules
-#define _ATL_APARTMENT_THREADED
-
 // Controls how CString constructors behave
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS
 
