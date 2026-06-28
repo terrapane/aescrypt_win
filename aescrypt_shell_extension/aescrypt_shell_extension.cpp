@@ -60,7 +60,7 @@ std::wstring GetModulePath(HMODULE module)
                                          pathname.data(),
                                          static_cast<DWORD>(pathname.size()));
 
-        if (length == 0) return L"";
+        if (length == 0) return {};
 
         if (length < pathname.size() - 1)
         {
