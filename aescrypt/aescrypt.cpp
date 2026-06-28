@@ -21,7 +21,7 @@
 #include <Windows.h>
 #include <atlbase.h>
 #include <atlhost.h>
-#include "worker_threads.h"
+#include "aescrypt_core.h"
 #include "mode.h"
 #include "file_list.h"
 #include "aescrypt.h"
@@ -29,13 +29,13 @@
 namespace
 {
 
-// Function to wrap the WorkerThreads object, as only one instance is needed
-WorkerThreads &GetWorkerThreads()
+// Function to wrap the AESCryptCore object, as only one instance is needed
+AESCryptCore &GetAESCryptCore()
 {
-    // Worker Threads class to perform encrytion/decryption in the background
-    static WorkerThreads worker_threads;
+    // AESCryptCore class to perform encrytion/decryption in the background
+    static AESCryptCore aescrypt_core;
 
-    return worker_threads;
+    return aescrypt_core;
 }
 
 } // namespace
@@ -55,7 +55,7 @@ BOOL WINAPI DllMain([[maybe_unused]] HMODULE module_handle,
             // Ensure the worker threads have fully exited; the user of this
             // library should call AESLibraryBusy() so that this routine is not
             // forced to sit in a loop an wait, but is added as a precaution
-            while (GetWorkerThreads().IsBusy()) Sleep(250);
+            while (GetAESCryptCore().IsBusy()) Sleep(250);
             break;
     }
 
@@ -66,12 +66,12 @@ BOOL WINAPI DllMain([[maybe_unused]] HMODULE module_handle,
 // encrypt or decrypt a list of files
 void __cdecl ProcessFiles(FileList &file_list, AESCryptMode mode)
 {
-    GetWorkerThreads().ProcessFiles(file_list, mode);
+    GetAESCryptCore().ProcessFiles(file_list, mode);
 }
 
 // Exported function that allows the library user to determine if all of the
 // active encryption or decryption threads have completed work
 bool __cdecl AESLibraryBusy()
 {
-    return GetWorkerThreads().IsBusy();
+    return GetAESCryptCore().IsBusy();
 }

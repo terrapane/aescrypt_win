@@ -273,7 +273,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aescrypt.cpp" />
-    <ClCompile Include="worker_threads.cpp" />
+    <ClCompile Include="aescrypt_core.cpp" />
     <ClCompile Include="report_error.cpp" />
     <ClCompile Include="has_aes_extension.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -300,7 +300,7 @@
     <ClInclude Include="include\aescrypt.h" />
     <ClInclude Include="include\file_list.h" />
     <ClInclude Include="include\mode.h" />
-    <ClInclude Include="worker_threads.h" />
+    <ClInclude Include="aescrypt_core.h" />
     <ClInclude Include="report_error.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="globals.h" />

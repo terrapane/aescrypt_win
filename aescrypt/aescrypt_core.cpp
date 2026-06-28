@@ -1,5 +1,5 @@
 /*
- *  worker_threads.cpp
+ *  aescrypt_core.cpp
  *
  *  Copyright (C) 2006-2026
  *  Terrapane Corporation
@@ -9,7 +9,7 @@
  *      Paul E. Jones <paulej@packetizer.com>
  *
  *  Description:
- *      This file implements the WorkerThreads class, which is responsible for
+ *      This file implements the AESCryptCore class, which is responsible for
  *      all background encryption and decryption operations.
  *
  *  Portability Issues:
@@ -40,7 +40,7 @@
 #include <terra/aescrypt/engine/decryptor.h>
 #include <terra/aescrypt_lm/aescrypt_lm.h>
 #include <terra/bitutil/byte_order.h>
-#include "worker_threads.h"
+#include "aescrypt_core.h"
 #include "mode.h"
 #include "password_dialog.h"
 #include "report_error.h"
@@ -53,14 +53,14 @@
 #include "file_list.h"
 #include "secure_containers.h"
 
+namespace
+{
+
 // Minimum frequency with which to update the progress meter
 constexpr std::chrono::milliseconds Progress_Update_Minimum(250);
 
 // Minimum progress meter update interval
 constexpr std::size_t Minimal_Interval = 16 * 100;
-
-namespace
-{
 
 const std::wstring Application_Name = L"AES Crypt";
 
@@ -69,13 +69,13 @@ const std::wstring Application_Name = L"AES Crypt";
  *
  *  Description:
  *      This is a C function call used as the initial starting point when
- *      a new thread is created.  It receives a pointer to the WorkerThreads
+ *      a new thread is created.  It receives a pointer to the AESCryptCore
  *      object and then calls the ThreadEntry() function so that it can then
  *      get the data needed to continue file processing.
  *
  *  Parameters:
  *      lpParameter [in]
- *          A pointer to a WorkerThreads object.
+ *          A pointer to a AESCryptCore object.
  *
  *  Returns:
  *      Always returns 0.
@@ -87,21 +87,21 @@ DWORD WINAPI ThreadEntry(LPVOID lpParameter)
 {
     try
     {
-        WorkerThreads *aes_crypt_worker_threads =
-            reinterpret_cast<WorkerThreads *>(lpParameter);
+        AESCryptCore *aes_crypt_core =
+            reinterpret_cast<AESCryptCore *>(lpParameter);
 
-        aes_crypt_worker_threads->ThreadEntry();
+        aes_crypt_core->ThreadEntry();
     }
     catch (const std::exception &e)
     {
         ::ReportError(Application_Name + L" Error",
-                      L"Unhandled exception in worker thread: ",
+                      L"Unhandled exception from worker thread: ",
                       e.what());
     }
     catch (...)
     {
         ::ReportError(Application_Name + L" Error",
-                      L"Unhandled exception in worker thread");
+                      L"Unhandled exception from worker thread");
     }
 
     return 0;
@@ -110,10 +110,10 @@ DWORD WINAPI ThreadEntry(LPVOID lpParameter)
 } // namespace
 
 /*
- *  WorkerThreads::WorkerThreads()
+ *  AESCryptCore::AESCryptCore()
  *
  *  Description:
- *      Constructor for the WorkerThreads object.
+ *      Constructor for the AESCryptCore object.
  *
  *  Parameters:
  *      None.
@@ -124,7 +124,7 @@ DWORD WINAPI ThreadEntry(LPVOID lpParameter)
  *  Comments:
  *      None.
  */
-WorkerThreads::WorkerThreads() : thread_count{0}
+AESCryptCore::AESCryptCore() : thread_count{0}
 {
     // Load the application name
     HMODULE hModule{};
@@ -152,10 +152,10 @@ WorkerThreads::WorkerThreads() : thread_count{0}
 }
 
 /*
- *  WorkerThreads::~WorkerThreads()
+ *  AESCryptCore::~AESCryptCore()
  *
  *  Description:
- *      Destructor for the WorkerThreads object.
+ *      Destructor for the AESCryptCore object.
  *
  *  Parameters:
  *      None.
@@ -166,7 +166,7 @@ WorkerThreads::WorkerThreads() : thread_count{0}
  *  Comments:
  *      None.
  */
-WorkerThreads::~WorkerThreads()
+AESCryptCore::~AESCryptCore()
 {
     std::unique_lock<std::mutex> lock(module_mutex);
 
@@ -189,7 +189,7 @@ WorkerThreads::~WorkerThreads()
 }
 
 /*
- *  WorkerThreads::IsBusy()
+ *  AESCryptCore::IsBusy()
  *
  *  Description:
  *      Returns true if there are active threads.  This doesn't mean that the
@@ -205,7 +205,7 @@ WorkerThreads::~WorkerThreads()
  *  Comments:
  *      None.
  */
-bool WorkerThreads::IsBusy()
+bool AESCryptCore::IsBusy()
 {
     // Close any completed thread handles
     CloseThreadHandles();
@@ -216,7 +216,7 @@ bool WorkerThreads::IsBusy()
 }
 
 /*
- *  WorkerThreads::ProcessFiles()
+ *  AESCryptCore::ProcessFiles()
  *
  *  Description:
  *      This function is called once the user selects the shell extension
@@ -238,7 +238,7 @@ bool WorkerThreads::IsBusy()
  *  Comments:
  *      None.
  */
-void WorkerThreads::ProcessFiles(const FileList &file_list, AESCryptMode mode)
+void AESCryptCore::ProcessFiles(const FileList &file_list, AESCryptMode mode)
 {
     PasswdDialog password_dialog(application_name);
 
@@ -285,7 +285,7 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, AESCryptMode mode)
 }
 
 /*
- *  WorkerThreads::CloseThreadHandles()
+ *  AESCryptCore::CloseThreadHandles()
  *
  *  Description:
  *      This function will wait on any threads that are finished to ensure
@@ -301,7 +301,7 @@ void WorkerThreads::ProcessFiles(const FileList &file_list, AESCryptMode mode)
  *      This function will lock and unlock the mutex, so it should not be
  *      locked by the caller.
  */
-void WorkerThreads::CloseThreadHandles()
+void AESCryptCore::CloseThreadHandles()
 {
     std::unique_lock<std::mutex> lock(module_mutex);
 
@@ -327,7 +327,7 @@ void WorkerThreads::CloseThreadHandles()
 }
 
 /*
- *  WorkerThreads::StartThread()
+ *  AESCryptCore::StartThread()
  *
  *  Description:
  *      This function is called after the user provides a password to start
@@ -349,9 +349,9 @@ void WorkerThreads::CloseThreadHandles()
  *  Comments:
  *      None.
  */
-void WorkerThreads::StartThread(const FileList &file_list,
-                                const SecureU8String &password,
-                                AESCryptMode mode)
+void AESCryptCore::StartThread(const FileList &file_list,
+                               const SecureU8String &password,
+                               AESCryptMode mode)
 {
     DWORD thread_id;
 
@@ -387,12 +387,12 @@ void WorkerThreads::StartThread(const FileList &file_list,
 }
 
 /*
- *  WorkerThreads::ThreadEntry()
+ *  AESCryptCore::ThreadEntry()
  *
  *  Description:
- *      This is the entry point where the worker thread calls to actually
- *      begin processing files.  It will get the information it needs from
- *      the member variables and then begin processing.
+ *      This is the entry point where the worker thread calls to begin
+ *      processing files.  It will get the information it needs from the
+ *      member variables and then begin processing.
  *
  *  Parameters:
  *      None.
@@ -403,7 +403,7 @@ void WorkerThreads::StartThread(const FileList &file_list,
  *  Comments:
  *      None.
  */
-void WorkerThreads::ThreadEntry()
+void AESCryptCore::ThreadEntry()
 {
     // Close any completed thread handles
     CloseThreadHandles();
@@ -476,7 +476,7 @@ void WorkerThreads::ThreadEntry()
 }
 
 /*
- *  WorkerThreads::EncryptFiles()
+ *  AESCryptCore::EncryptFiles()
  *
  *  Description:
  *      This function will iterate over the list of files and encrypt each one
@@ -495,8 +495,8 @@ void WorkerThreads::ThreadEntry()
  *  Comments:
  *      None.
  */
-void WorkerThreads::EncryptFiles(const FileList &file_list,
-                                 const SecureU8String &password)
+void AESCryptCore::EncryptFiles(const FileList &file_list,
+                                const SecureU8String &password)
 {
     std::condition_variable cv;
     std::mutex mutex;
@@ -749,7 +749,8 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
     }
 
     // Instruct the progress window to terminate
-    const DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
+    const DWORD progress_thread_id =
+        GetThreadId(progress_thread.native_handle());
     PostThreadMessage(progress_thread_id, WM_QUIT, 0, 0);
 
     // Wait for the progress window thread to complete
@@ -757,7 +758,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
 }
 
 /*
- *  WorkerThreads::EncryptStream()
+ *  AESCryptCore::EncryptStream()
  *
  *  Description:
  *      This function will encrypt the given input stream to the given output
@@ -800,7 +801,7 @@ void WorkerThreads::EncryptFiles(const FileList &file_list,
  *  Comments:
  *      None.
  */
-std::pair<bool, std::string> WorkerThreads::EncryptStream(
+std::pair<bool, std::string> AESCryptCore::EncryptStream(
                                                 std::condition_variable & cv,
                                                 std::mutex &mutex,
                                                 ProgressDialog &progress_dialog,
@@ -936,7 +937,7 @@ std::pair<bool, std::string> WorkerThreads::EncryptStream(
 }
 
 /*
- *  WorkerThreads::DecryptFiles()
+ *  AESCryptCore::DecryptFiles()
  *
  *  Description:
  *      This function will iterate over the list of files and decrypt each one
@@ -955,8 +956,8 @@ std::pair<bool, std::string> WorkerThreads::EncryptStream(
  *  Comments:
  *      None.
  */
-void WorkerThreads::DecryptFiles(const FileList &file_list,
-                                 const SecureU8String &password)
+void AESCryptCore::DecryptFiles(const FileList &file_list,
+                                const SecureU8String &password)
 {
     std::condition_variable cv;
     std::mutex mutex;
@@ -1213,7 +1214,8 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
     }
 
     // Instruct the progress window to terminate
-    const DWORD progress_thread_id = GetThreadId(progress_thread.native_handle());
+    const DWORD progress_thread_id =
+        GetThreadId(progress_thread.native_handle());
     PostThreadMessage(progress_thread_id, WM_QUIT, 0, 0);
 
     // Wait for the progress window thread to complete
@@ -1221,7 +1223,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
 }
 
 /*
- *  WorkerThreads::DecryptStream()
+ *  AESCryptCore::DecryptStream()
  *
  *  Description:
  *      This function will decrypt the given input stream to the given output
@@ -1258,7 +1260,7 @@ void WorkerThreads::DecryptFiles(const FileList &file_list,
  *  Comments:
  *      None.
  */
-std::pair<bool, std::string> WorkerThreads::DecryptStream(
+std::pair<bool, std::string> AESCryptCore::DecryptStream(
                                                 std::condition_variable &cv,
                                                 std::mutex &mutex,
                                                 ProgressDialog &progress_dialog,
@@ -1390,7 +1392,7 @@ std::pair<bool, std::string> WorkerThreads::DecryptStream(
 }
 
 /*
- *  WorkerThreads::WindowsMessageLoop()
+ *  AESCryptCore::WindowsMessageLoop()
  *
  *  Description:
  *      This routine will service the Windows message queues for the running
@@ -1406,7 +1408,7 @@ std::pair<bool, std::string> WorkerThreads::DecryptStream(
  *      None.
  */
 
-void WorkerThreads::WindowsMessageLoop()
+void AESCryptCore::WindowsMessageLoop()
 {
     MSG msg;
 

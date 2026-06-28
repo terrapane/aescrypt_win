@@ -1,5 +1,5 @@
 /*
- *  worker_threads.cpp
+ *  aescrypt_core.cpp
  *
  *  Copyright (C) 2006-2026
  *  Terrapane Corporation
@@ -9,7 +9,7 @@
  *      Paul E. Jones <paulej@packetizer.com>
  *
  *  Description:
- *      This file defines the WorkerThreads class, which is responsible for all
+ *      This file defines the AESCryptCore class, which is responsible for all
  *      background encryption and decryption operations.
  *
  *  Portability Issues:
@@ -47,12 +47,13 @@ struct RequestData
     HANDLE thread_handle;
 };
 
-// Class that interfaces between the Windows shell and the AES Crypt Engine
-class WorkerThreads
+// Class provides the core logic to handle user interaction, background
+// encryption and decryption, etc.
+class AESCryptCore
 {
     public:
-        WorkerThreads();
-        ~WorkerThreads();
+        AESCryptCore();
+        ~AESCryptCore();
 
         // Indicates whether threads are working
         bool IsBusy();
