@@ -131,7 +131,7 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>$(SolutionDir)\out\install\$(Platform)-$(Configuration)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;Bcrypt.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);UxTheme.lib;Bcrypt.lib;msi.lib;secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -200,7 +200,7 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>$(SolutionDir)\out\install\$(Platform)-$(Configuration)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;Bcrypt.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);UxTheme.lib;Bcrypt.lib;msi.lib;secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -268,7 +268,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)\out\install\$(Platform)-$(Configuration)\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;Bcrypt.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);UxTheme.lib;Bcrypt.lib;msi.lib;secutil.lib;charutil.lib;aescrypt_engine.lib;aescrypt_lm.lib;logger.lib;random.lib;hash.lib;aes.lib;conio.lib;json.lib;kdf.lib;bitutil.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
