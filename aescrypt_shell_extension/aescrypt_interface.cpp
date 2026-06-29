@@ -158,7 +158,7 @@ bool AESCryptInterface::LoadAESCryptLibrary()
     if (module_path.empty())
     {
         ::MessageBox(NULL,
-                     L"Cannot determine the path to the core AES Crypt Library",
+                     L"Cannot determine the path to the AES Crypt library",
                      application_title.c_str(),
                      MB_ICONERROR | MB_OK);
         return false;
@@ -166,7 +166,14 @@ bool AESCryptInterface::LoadAESCryptLibrary()
 
     // Attempt to load the library
     module_handle = LoadLibrary(module_path.c_str());
-    if (!module_handle) return false;
+    if (!module_handle)
+    {
+        ::MessageBox(NULL,
+                     L"Failed to load the core encryption library",
+                     application_title.c_str(),
+                     MB_ICONERROR | MB_OK);
+        return false;
+    }
 
     // Get the function pointers
     process_files = reinterpret_cast<ProcessFilesFunc>(
@@ -178,6 +185,10 @@ bool AESCryptInterface::LoadAESCryptLibrary()
     if (!process_files || !aes_library_busy)
     {
         UnloadAESCryptLibrary();
+        ::MessageBox(NULL,
+                     L"Failed to get locate functions in the AES Crypt library",
+                     application_title.c_str(),
+                     MB_ICONERROR | MB_OK);
         return false;
     }
 
@@ -204,15 +215,7 @@ void AESCryptInterface::ProcessFiles(FileList &file_list, AESCryptMode mode)
     std::unique_lock<std::mutex> lock(mutex);
 
     // Attempt to load the library, but fail if it cannot be loaded
-    if (!LoadAESCryptLibrary())
-    {
-        ::MessageBox(NULL,
-                     L"Failed to load the core encryption library",
-                     application_title.c_str(),
-                     MB_ICONERROR | MB_OK);
-
-        return;
-    }
+    if (!LoadAESCryptLibrary()) return;
 
     // Increment the thread count
     thread_count++;
