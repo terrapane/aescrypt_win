@@ -240,6 +240,14 @@ bool AESCryptCore::IsBusy()
  */
 void AESCryptCore::ProcessFiles(const FileList &file_list, AESCryptMode mode)
 {
+    // Proceed only if mode is Encrypt or Decrypt
+    if ((mode != AESCryptMode::Encrypt) && (mode != AESCryptMode::Decrypt))
+    {
+        ::ReportError(application_error,
+                        L"AES Crypt operating mode is not properly specified");
+        return;
+    }
+
     PasswdDialog password_dialog(application_name);
 
     // Verify user license rights

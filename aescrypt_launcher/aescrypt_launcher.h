@@ -15,8 +15,10 @@
  *      to perform processing in the background.
  *
  *      The reason this program exists is to serve as a launcher that gets
- *      invoked when the user double-clicks on a .aes file.  It is not
- *      intended to be used directly by the user or via the command-line.
+ *      invoked when the user double-clicks on a .aes file or launches
+ *      AES Crypt from the Start menu.  It is not intended to be used from
+ *      the command-line, though it will work.  The tool aescrypt.exe file
+ *      exists for use from the command-line.
  *
  *  Portability Issues:
  *      Windows specific code.
