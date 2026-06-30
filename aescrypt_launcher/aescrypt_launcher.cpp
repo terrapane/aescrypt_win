@@ -29,6 +29,7 @@
 #include <shellapi.h>
 #include <shobjidl.h>
 #include <string>
+#include <deque>
 #include "mode.h"
 #include "file_list.h"
 #include "has_aes_extension.h"
