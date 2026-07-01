@@ -141,7 +141,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     }
 
     // Create the main application window for event control
-    HWND hWnd = CreateWindow(application_name.c_str(),
+    HWND hwnd = CreateWindow(application_name.c_str(),
                              application_name.c_str(),
                              WS_OVERLAPPED,
                              CW_USEDEFAULT,
@@ -153,14 +153,15 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                              hInstance,
                              NULL);
 
-    ShowWindow(hWnd, SW_HIDE);
-    UpdateWindow(hWnd);
+    ShowWindow(hwnd, SW_HIDE);
+    UpdateWindow(hwnd);
 
     // If no filenames given on the command-line, then open File Explorer
     if (nArgs <= 1)
     {
         // Allow the user to select files to encrypt or decrypt
-        file_list = SelectFiles(application_name,
+        file_list = SelectFiles(hwnd,
+                                application_name,
                                 L"Select File(s) to Encrypt or Decrypt");
     }
     else
@@ -179,7 +180,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     if (file_list.empty())
     {
         // Signal the application to exit when no files were selected
-        SendMessage(hWnd, WM_DESTROY, 0, 0);
+        SendMessage(hwnd, WM_DESTROY, 0, 0);
     }
     else if (mode == AESCryptMode::Undefined)
     {
@@ -191,7 +192,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                      MB_ICONERROR | MB_OK);
 
         // Signal the application to exit
-        SendMessage(hWnd, WM_DESTROY, 0, 0);
+        SendMessage(hwnd, WM_DESTROY, 0, 0);
     }
     else
     {
@@ -227,7 +228,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
             }
             else
             {
-                SendMessage(hWnd, WM_DESTROY, 0, 0);
+                SendMessage(hwnd, WM_DESTROY, 0, 0);
             }
         }
     }

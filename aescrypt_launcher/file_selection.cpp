@@ -143,6 +143,9 @@ class DialogCenterEvents : public IFileDialogEvents
  *      for encrypting or decrypting.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the owning window.  This can be NULL if there isn't one.
+ *
  *      application_title [in]
  *          The name of the application to appear at the top of the dialog.
  *
@@ -155,7 +158,8 @@ class DialogCenterEvents : public IFileDialogEvents
  *  Comments:
  *      None.
  */
-std::deque<std::wstring> SelectFiles(std::wstring_view application_title,
+std::deque<std::wstring> SelectFiles(HWND hwnd,
+                                     std::wstring_view application_title,
                                      std::wstring_view description)
 {
     std::deque<std::wstring> files;
@@ -183,7 +187,7 @@ std::deque<std::wstring> SelectFiles(std::wstring_view application_title,
     bool advised = SUCCEEDED(dialog->Advise(center_events, &dwCookie));
 
     // Show the file selection dialog
-    hr = dialog->Show(nullptr);
+    hr = dialog->Show(hwnd);
     if (advised) dialog->Unadvise(dwCookie);
     center_events->Release();
     if (FAILED(hr))

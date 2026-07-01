@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <Windows.h>
 #include <deque>
 #include <string>
 #include <string_view>
@@ -30,6 +31,9 @@
  *      for encrypting or decrypting.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the owning window.  This can be NULL if there isn't one.
+ *
  *      application_title [in]
  *          The name of the application to appear at the top of the dialog.
  *
@@ -42,5 +46,6 @@
  *  Comments:
  *      None.
  */
-std::deque<std::wstring> SelectFiles(std::wstring_view application_title,
+std::deque<std::wstring> SelectFiles(HWND hwnd,
+                                     std::wstring_view application_title,
                                      std::wstring_view description);
