@@ -26,14 +26,15 @@
 
 #include "pch.h"
 #include <Windows.h>
+#include <ShObjIdl_core.h>
 #include <shellapi.h>
-#include <shobjidl.h>
 #include <string>
 #include <deque>
 #include "mode.h"
 #include "file_list.h"
 #include "has_aes_extension.h"
 #include "aescrypt_launcher.h"
+#include "file_selection.h"
 #include "resource.h"
 #include "aescrypt.h"
 
@@ -54,67 +55,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
-// Function to open a dialog window to select files
-std::deque<std::wstring> SelectFiles(std::wstring_view application_title)
-{
-    std::deque<std::wstring> files;
-
-    IFileOpenDialog *dialog = nullptr;
-    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog,
-                                  nullptr,
-                                  CLSCTX_INPROC_SERVER,
-                                  IID_PPV_ARGS(&dialog));
-    if (FAILED(hr)) return {};
-
-    // Allow selection of multiple files
-    DWORD options;
-    dialog->GetOptions(&options);
-    dialog->SetOptions(options | FOS_ALLOWMULTISELECT);
-
-    // Custom title
-    std::wstring file_selection_title = std::wstring(application_title) +
-        std::wstring(L" - Select File(s) to Encrypt or Decrypt");
-    dialog->SetTitle(file_selection_title.c_str());
-
-    // Show the file selection dialog
-    hr = dialog->Show(nullptr);
-    if (FAILED(hr))
-    {
-        dialog->Release();
-        return {};
-    }
-
-    // Get selected items
-    IShellItemArray *items = nullptr;
-    hr = dialog->GetResults(&items);
-    if (SUCCEEDED(hr))
-    {
-        DWORD count = 0;
-        items->GetCount(&count);
-
-        // Iterate over all of the items
-        for (DWORD i = 0; i < count; i++)
-        {
-            IShellItem *pItem = nullptr;
-            if (SUCCEEDED(items->GetItemAt(i, &pItem)))
-            {
-                PWSTR path = nullptr;
-                if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &path)))
-                {
-                    files.emplace_back(path);
-                    CoTaskMemFree(path);
-                }
-                pItem->Release();
-            }
-        }
-        items->Release();
-    }
-
-    dialog->Release();
-
-    return files;
 }
 
 // Function to determine whether the operation mode (based on file extension)
@@ -220,7 +160,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     if (nArgs <= 1)
     {
         // Allow the user to select files to encrypt or decrypt
-        file_list = SelectFiles(application_name);
+        file_list = SelectFiles(application_name,
+                                L"Select File(s) to Encrypt or Decrypt");
     }
     else
     {
