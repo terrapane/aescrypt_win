@@ -365,7 +365,6 @@
     <ClInclude Include="aescrypt_context_menu.h" />
     <ClInclude Include="aescrypt_interface.h" />
     <ClInclude Include="has_aes_extension.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="progress_dialog.h" />
     <ClInclude Include="resource.h" />

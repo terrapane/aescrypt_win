@@ -218,7 +218,6 @@
     <ClInclude Include="aescrypt_launcher.h" />
     <ClInclude Include="file_selection.h" />
     <ClInclude Include="has_aes_extension.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

@@ -302,7 +302,6 @@
     <ClInclude Include="include\mode.h" />
     <ClInclude Include="aescrypt_core.h" />
     <ClInclude Include="report_error.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="has_aes_extension.h" />
     <ClInclude Include="password_dialog.h" />
