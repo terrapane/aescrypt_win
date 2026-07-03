@@ -28,13 +28,17 @@ import "ocidl.idl";
     helpstring("IAECryptContextMenu Interface"),
     pointer_default(unique)
 ]
-interface IAESCryptContextMenu : IUnknown{
+
+interface IAESCryptContextMenu : IUnknown
+{
 };
+
 [
     uuid(EB9FFF86-F4EC-4882-B45E-90C4EB1ECC07),
     version(4.0),
     helpstring("AES Crypt Shell Extension Type Library")
 ]
+
 library AESCryptShellExtensionLib
 {
     importlib("stdole2.tlb");
