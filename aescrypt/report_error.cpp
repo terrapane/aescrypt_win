@@ -17,8 +17,8 @@
 
 #include "pch.h"
 #include <Windows.h>
-#include <tchar.h>
 #include <string>
+#include <string_view>
 #include <cstdint>
 #include <terra/charutil/character_utilities.h>
 #include <terra/bitutil/byte_order.h>
@@ -136,7 +136,7 @@ void ReportError(const std::wstring &window_title,
     }
     else
     {
-        unicode_error = L"Error occurred, as did a UTF-8 conversion error";
+        unicode_error = L"Error occurred, but unable to produce error text";
     }
 
     std::wstring error_text = message + L": " + unicode_error;
@@ -190,10 +190,15 @@ void ReportError(const std::wstring &window_title,
                             0,
                             NULL) != 0)
         {
-            LPTSTR p = _tcschr(error_string, L'\r');
-            if (p != NULL) { *p = L'\0'; }
+            // Truncate the string
+            std::wstring_view view(error_string);
+            if (auto position = view.find_first_of(L"\r\n");
+                position != std::wstring::npos)
+            {
+                error_string[position] = L'\0';
+            }
 
-            reported_message += L":\n";
+            reported_message += L": ";
             reported_message += error_string;
 
             ::LocalFree(error_string);
