@@ -328,7 +328,6 @@
   <ItemGroup>
     <ClCompile Include="aescrypt_shell_extension.cpp" />
     <ClCompile Include="aescrypt_context_menu.cpp" />
-    <ClCompile Include="aescrypt_interface.cpp" />
     <ClCompile Include="has_aes_extension.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -363,7 +362,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aescrypt_context_menu.h" />
-    <ClInclude Include="aescrypt_interface.h" />
     <ClInclude Include="has_aes_extension.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="progress_dialog.h" />

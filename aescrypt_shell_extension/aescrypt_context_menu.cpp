@@ -28,11 +28,109 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "aescrypt_interface.h"
+#include <filesystem>
+#include <algorithm>
+#include <limits>
+#include <cstddef>
+#include <span>
 #include "aescrypt_context_menu.h"
-#include "mode.h"
 #include "has_aes_extension.h"
 #include "resource.h"
+
+namespace
+{
+
+/*
+ *  GetModulePath()
+ *
+ *  Description:
+ *      Get the path to the directory holding the module identified by
+ *      the module handle provided.
+ *
+ *  Parameters:
+ *      module [in]
+ *          Module handle for which to get the path.
+ *
+ *  Returns:
+ *      A string containing the path to the module or an empty string if there
+ *      was an error.
+ *
+ *  Comments:
+ *      None.
+ */
+std::wstring GetModulePath(HMODULE module)
+{
+    std::wstring pathname(512, L'\0');
+
+    while (true)
+    {
+        DWORD length = GetModuleFileName(module,
+                                         pathname.data(),
+                                         static_cast<DWORD>(pathname.size()));
+
+        if (length == 0) return {};
+
+        if (length < pathname.size() - 1)
+        {
+            pathname.resize(length);
+            return pathname;
+        }
+
+        // Buffer was too small, so grow and retry
+        pathname.resize(pathname.size() * 2);
+    }
+}
+
+/*
+ *  WriteToPipe()
+ *
+ *  Description:
+ *      This function will write data to the pipe, ensuring that all data
+ *      is written or return false if there is a failure.
+ *
+ *  Parameters:
+ *      handle [in]
+ *          Handle to the pipe to which to write
+ *
+ *      data [in]
+ *          Data to write
+ *
+ *  Returns:
+ *      A string containing the path to the module or an empty string if there
+ *      was an error.
+ *
+ *  Comments:
+ *      None.
+ */
+bool WriteToPipe(HANDLE handle, std::span<const std::byte> data)
+{
+    while (!data.empty())
+    {
+        // Cap single write size to DWORD maximum (4 GB)
+        const DWORD bytesToWrite = static_cast<DWORD>(
+            std::min<std::size_t>(data.size(),
+                                  std::numeric_limits<DWORD>::max()));
+
+        DWORD written = 0;
+        if (!WriteFile(handle, data.data(), bytesToWrite, &written, nullptr))
+        {
+            return false;
+        }
+
+        if (written == 0)
+        {
+            // Pipe accepted zero bytes; treat as failure
+            return false;
+        }
+
+        // Advance the span window by slicing off the written bytes
+        data = data.subspan(written);
+    }
+
+    return true;
+}
+
+} // namespace
 
 /*
  *  AESCryptContextMenu::AESCryptContextMenu()
@@ -66,6 +164,13 @@ AESCryptContextMenu::AESCryptContextMenu() :
                                        0,
                                        0,
                                        LR_CREATEDIBSECTION));
+
+    application_name.resize(256, L'\0');
+    auto length = LoadString(ATL::_pModule->GetModuleInstance(),
+                             IDS_APP_TITLE,
+                             application_name.data(),
+                             static_cast<int>(application_name.size()));
+    application_name.resize(length);
 }
 
 /*
@@ -348,7 +453,7 @@ HRESULT AESCryptContextMenu::QueryContextMenu(HMENU hMenu,
  *      uFlags [in]
  *          Flags that control behavior of the query operation.
  *
- *      puReserved [in]
+ *      pwReserved [in]
  *          Reserved.
  *
  *      szName [in]
@@ -364,16 +469,18 @@ HRESULT AESCryptContextMenu::QueryContextMenu(HMENU hMenu,
  *      None.
  */
 #ifdef _M_X64
-HRESULT AESCryptContextMenu::GetCommandString(
-                                            UINT_PTR idCmd,
+HRESULT AESCryptContextMenu::GetCommandString(UINT_PTR idCmd,
+                                              UINT uType,
+                                              [[maybe_unused]] UINT *pwReserved,
+                                              LPSTR szName,
+                                              UINT cchMax)
 #else
-HRESULT AESCryptContextMenu::GetCommandString(
-                                            UINT idCmd,
+HRESULT AESCryptContextMenu::GetCommandString(UINT idCmd,
+                                              UINT uType,
+                                              [[maybe_unused]] UINT *pwReserved,
+                                              LPSTR szName,
+                                              UINT cchMax)
 #endif
-                                            UINT uType,
-                                            [[maybe_unused]] UINT *puReserved,
-                                            LPSTR szName,
-                                            UINT cchMax)
 {
     const wchar_t *command_text;
 
@@ -465,14 +572,177 @@ HRESULT AESCryptContextMenu::InvokeCommand(LPCMINVOKECOMMANDINFO pInfo)
         return E_INVALIDARG;
     }
 
-    const AESCryptMode mode =
-        (aes_files) ? AESCryptMode::Decrypt : AESCryptMode::Encrypt;
-
     // The menu item was invoked, so process the list of files
-    GetAESCryptInterface().ProcessFiles(file_list, mode);
+    auto result = ProcessFiles();
 
     // Clear the file list
     file_list.clear();
 
-    return S_OK;
+    return result;
+}
+
+/*
+ *  AESCryptContextMenu::ProcessFiles()
+ *
+ *  Description:
+ *      This function will invoke the background process to process to user's
+ *      selected files.
+ *
+ *  Parameters:
+ *      None.
+ *
+ *  Returns:
+ *      Nothing.
+ *
+ *  Comments:
+ *      None.
+ */
+HRESULT AESCryptContextMenu::ProcessFiles()
+{
+    // Locate the location of the shell extension DLL
+    HMODULE hModule = reinterpret_cast<HMODULE>(&__ImageBase);
+
+    // Determine the location of the AES Crypt Shell Extension DLL and
+    // assume the same directory for the AES Crypt Launcher
+    std::wstring dll_path = GetModulePath(hModule);
+    std::filesystem::path dll_dir =
+        std::filesystem::path(dll_path).parent_path();
+    std::wstring launcher = (dll_dir / L"aescrypt_launcher.exe").wstring();
+
+    // Create an anonymous pipe
+    SECURITY_ATTRIBUTES sa = {sizeof(sa), nullptr, TRUE};
+    HANDLE handle_read = nullptr;
+    HANDLE handle_write = nullptr;
+
+    // Request a 64K buffer for this pipe
+    DWORD pipe_buffer_size = 65536;
+    if (!CreatePipe(&handle_read, &handle_write, &sa, pipe_buffer_size))
+    {
+        return HRESULT_FROM_WIN32(GetLastError());
+    }
+
+    // Build command line
+    std::wstring cmdLine =
+        L"\"" + launcher + L"\" /pipe=" +
+        std::to_wstring(reinterpret_cast<unsigned long long>(handle_read));
+
+    // Ensure the write end is strictly local to the shell extension
+    SetHandleInformation(handle_write, HANDLE_FLAG_INHERIT, 0);
+
+    // Set up explicit handle inheritance list (only inherit handle_read)
+    SIZE_T attributeSize = 0;
+    InitializeProcThreadAttributeList(nullptr, 1, 0, &attributeSize);
+
+    // Ensure the attribute list size is not zero
+    if (attributeSize == 0)
+    {
+        DWORD error = GetLastError();
+        CloseHandle(handle_read);
+        CloseHandle(handle_write);
+        return HRESULT_FROM_WIN32(error);
+    }
+
+    std::vector<BYTE> attributeListBuffer(attributeSize);
+    PPROC_THREAD_ATTRIBUTE_LIST pAttributeList =
+        reinterpret_cast<PPROC_THREAD_ATTRIBUTE_LIST>(
+            attributeListBuffer.data());
+
+    // Initialize the attribute list
+    if (!InitializeProcThreadAttributeList(pAttributeList,
+                                           1,
+                                           0,
+                                           &attributeSize))
+    {
+        DWORD error = GetLastError();
+        CloseHandle(handle_read);
+        CloseHandle(handle_write);
+        return HRESULT_FROM_WIN32(error);
+    }
+
+    // Update the attribute list
+    if (!UpdateProcThreadAttribute(pAttributeList,
+                                   0,
+                                   PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
+                                   &handle_read,
+                                   sizeof(HANDLE),
+                                   nullptr,
+                                   nullptr))
+    {
+        DWORD error = GetLastError();
+        DeleteProcThreadAttributeList(pAttributeList);
+        CloseHandle(handle_read);
+        CloseHandle(handle_write);
+        return HRESULT_FROM_WIN32(error);
+    }
+
+    // Configure STARTUPINFOEXW
+    STARTUPINFOEXW siEx = {};
+    siEx.StartupInfo.cb = sizeof(STARTUPINFOEXW);
+    siEx.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
+    siEx.StartupInfo.hStdInput = handle_read;
+    siEx.StartupInfo.hStdOutput = INVALID_HANDLE_VALUE;
+    siEx.StartupInfo.hStdError = INVALID_HANDLE_VALUE;
+    siEx.lpAttributeList = pAttributeList;
+
+    PROCESS_INFORMATION pi = {};
+
+    // Launch the AES Crypt Launcher process
+    BOOL created = CreateProcess(nullptr,
+                                 cmdLine.data(),
+                                 nullptr,
+                                 nullptr,
+                                 TRUE, // Inherit handles
+                                 EXTENDED_STARTUPINFO_PRESENT,
+                                 nullptr,
+                                 nullptr,
+                                 &siEx.StartupInfo,
+                                 &pi);
+
+    // Clean up attribute list structure
+    DeleteProcThreadAttributeList(pAttributeList);
+
+    if (!created)
+    {
+        DWORD error = GetLastError();
+        CloseHandle(handle_read);
+        CloseHandle(handle_write);
+
+        ::MessageBox(NULL,
+                     L"Failed to start the AES Crypt",
+                     application_name.c_str(),
+                     MB_ICONERROR | MB_OK);
+
+        return HRESULT_FROM_WIN32(error);
+    }
+
+    //  Close read handle so child owns the sole read handle
+    CloseHandle(handle_read);
+
+    // Write file list to the pipe
+    bool write_ok = true;
+    for (const auto &filename : file_list)
+    {
+        // Write out the length of the filename + the null terminator
+        write_ok = WriteToPipe(
+            handle_write,
+            std::as_bytes(std::span{filename.c_str(), filename.length() + 1}));
+
+        if (!write_ok) break;
+    }
+
+    // Terminate the child process if there is an error
+    DWORD write_error{};
+    if (!write_ok)
+    {
+        write_error = GetLastError();
+        TerminateProcess(pi.hProcess, 1);
+    }
+
+    // Signal EOF
+    CloseHandle(handle_write);
+
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+
+    return write_ok ? S_OK : HRESULT_FROM_WIN32(write_error);
 }

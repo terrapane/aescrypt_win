@@ -14,11 +14,11 @@
  *      This program is relatively simple and relies entirely on the DLL
  *      to perform processing in the background.
  *
- *      The reason this program exists is to serve as a launcher that gets
- *      invoked when the user double-clicks on a .aes file or launches
- *      AES Crypt from the Start menu.  It is not intended to be used from
- *      the command-line, though it will work.  The tool aescrypt.exe file
- *      exists for use from the command-line.
+ *      It can also accept a single a /pipe= argument from which it reads
+ *      a list of filenames.
+ *
+ *      The launcher loads the core aescrypt.dll to then perform encryption
+ *      or decryption on the list of files.
  *
  *  Portability Issues:
  *      Windows specific code.
@@ -29,7 +29,14 @@
 #include <ShObjIdl_core.h>
 #include <shellapi.h>
 #include <string>
+#include <string_view>
 #include <deque>
+#include <array>
+#include <vector>
+#include <optional>
+#include <algorithm>
+#include <iterator>
+#include <span>
 #include "mode.h"
 #include "file_list.h"
 #include "has_aes_extension.h"
@@ -55,6 +62,133 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+/*
+ *  ParsePipeID()
+ *
+ *  Description:
+ *      Function to parse the argument string looking for "/pipe=nnnn".
+ *
+ *  Parameters:
+ *      argument [in]
+ *          String argument to parse.
+ *
+ *  Returns:
+ *      An optional value containing the parsed integer value or std::nullopt
+ *      if there was an error parsing the string.
+ *
+ *  Comments:
+ *      None.
+ */
+std::optional<unsigned long long> ParsePipeID(const std::wstring_view argument)
+{
+    constexpr std::wstring_view prefix = L"/pipe=";
+
+    // See if the argument starts with "/pipe="
+    if (!argument.starts_with(prefix)) return std::nullopt;
+
+    // Extract substring after prefix
+    std::wstring number_part(argument.substr(prefix.length()));
+
+    try
+    {
+        std::size_t position = 0;
+        unsigned long long value = std::stoull(number_part, &position);
+
+        // Ensure the entire remaining string was converted
+        if (position == number_part.length()) return value;
+    }
+    catch (...)
+    {
+        // Parsing error means we ignore the argument
+    }
+
+    return std::nullopt;
+}
+
+/*
+ *  ReadFileListFromPipe()
+ *
+ *  Description:
+ *      This function will read the file list from the specified pipe, closing
+ *      the pipe when finished.
+ *
+ *  Parameters:
+ *      pipe_id [in]
+ *          The integer value of the pipe file descriptor / handle from which
+ *          to read filenames.
+ *
+ *  Returns:
+ *      A FileList containing the list of read files or an empty list if there
+ *      was any error.
+ *
+ *  Comments:
+ *      None.
+ */
+FileList ReadFileListFromPipe(unsigned long long pipe_fd)
+{
+    FileList file_list;
+    std::array<char, 1024 * sizeof(wchar_t)> buffer{};
+    std::vector<char> accumulator;
+    DWORD bytes_read = 0;
+
+    HANDLE handle = reinterpret_cast<HANDLE>(pipe_fd);
+
+    while (ReadFile(handle,
+                    buffer.data(),
+                    static_cast<DWORD>(buffer.size()),
+                    &bytes_read,
+                    nullptr))
+    {
+        if (bytes_read == 0) break;
+
+        // Append new bytes
+        accumulator.insert(accumulator.end(),
+                           buffer.begin(),
+                           std::next(buffer.begin(), bytes_read));
+
+        // Look for filenames in the accumulator vector
+        while (accumulator.size() >= sizeof(wchar_t))
+        {
+            // Create a type-safe view of whole wchar_t elements
+            std::span<const wchar_t> wchar_span{
+                reinterpret_cast<const wchar_t *>(accumulator.data()),
+                accumulator.size() / sizeof(wchar_t)};
+
+            // Search for the wide null terminator
+            auto it = std::ranges::find(wchar_span, L'\0');
+            if (it == wchar_span.end()) break;
+
+            // Create a subspan representing strictly the filename
+            std::span<const wchar_t> filename_span =
+                wchar_span.first(std::distance(wchar_span.begin(), it));
+
+            // Construct std::wstring directly from the span view
+            file_list.emplace_back(filename_span.begin(), filename_span.end());
+
+            // Erase processed bytes + the L'\0' character from the accumulator
+            const size_t bytes_to_erase =
+                (filename_span.size() + 1) * sizeof(wchar_t);
+            accumulator.erase(accumulator.begin(),
+                              std::next(accumulator.begin(), bytes_to_erase));
+        }
+    }
+
+    // Capture the exit error state immediately after ReadFile returns false
+    const DWORD last_error = GetLastError();
+
+    CloseHandle(handle);
+
+    // ERROR_SUCCESS (0) and ERROR_BROKEN_PIPE (109) are valid EOF states; any
+    // other error or any partial bytes in accumulator indicates failure
+    if ((last_error != ERROR_SUCCESS && last_error != ERROR_BROKEN_PIPE) ||
+        !accumulator.empty())
+    {
+        return {};
+    }
+
+    return file_list;
 }
 
 // Function to determine whether the operation mode (based on file extension)
@@ -101,6 +235,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                     _In_ [[maybe_unused]] int nShowCmd)
 {
     FileList file_list;
+    std::optional<unsigned long long> pipe_fd;
     std::wstring application_name(256, L'\0');
 
     // Load the application name
@@ -111,14 +246,19 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                                    static_cast<int>(application_name.size()));
     application_name.resize(title_length);
 
-    // Initialize COM (used in SelectFiles())
-    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
-    if (FAILED(hr)) return 1;
-
     // Get the command-line argument string, exiting on failure
     int nArgs;
     LPWSTR *szArglist = CommandLineToArgvW(GetCommandLine(), &nArgs);
     if (szArglist == nullptr) return 1;
+
+    // Initialize COM (used in SelectFiles())
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr))
+    {
+        if (szArglist) LocalFree(szArglist);
+
+        return 1;
+    }
 
     // Create the window class for the hidden application window
     if (!hPrevInstance)
@@ -166,10 +306,22 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     }
     else
     {
-        // Put the filenames given into the file_list
-        for (std::size_t i = 1; i < nArgs; i++)
+        // Given two arguments (the command and one parameter), see if
+        // /pipe=nnn was provided
+        if (nArgs == 2) pipe_fd = ParsePipeID(szArglist[1]);
+
+        // If there is a valid /pipe argument, read the list from the pipe
+        if (pipe_fd)
         {
-            file_list.emplace_back(szArglist[i]);
+            file_list = ReadFileListFromPipe(*pipe_fd);
+        }
+        else
+        {
+            // Put the given filename parameters in a list
+            for (std::size_t i = 1; i < nArgs; i++)
+            {
+                file_list.emplace_back(szArglist[i]);
+            }
         }
     }
 

@@ -17,7 +17,7 @@ HKCR
         {
             NoRemove ContextMenuHandlers
             {
-                ForceRemove aescrypt_context_menu = s '{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}'
+                ForceRemove 'AES Crypt Context Menu' = s '{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}'
             }
         }
     }

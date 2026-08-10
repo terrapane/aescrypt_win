@@ -1,11 +1,11 @@
 HKCR
 {
-	NoRemove AppID
-	{
-		'%APPID%' = s 'aescrypt_shell_extension'
-		'aescrypt_shell_extension.dll'
-		{
-			val AppID = s '%APPID%'
-		}
-	}
+    NoRemove AppID
+    {
+        '%APPID%' = s 'AES Crypt Shell Extension'
+        'aescrypt_shell_extension.dll'
+        {
+            val AppID = s '%APPID%'
+        }
+    }
 }

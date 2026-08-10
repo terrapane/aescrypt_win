@@ -20,9 +20,8 @@
 #include "pch.h"
 #include <Windows.h>
 #include <atlbase.h>
-#include <filesystem>
+#include <string>
 #include "resource.h"
-#include "aescrypt_interface.h"
 #include "aescrypt_shell_extension.h"
 
 namespace
@@ -77,32 +76,6 @@ std::wstring GetModulePath(HMODULE module)
 class AESCryptModule : public ATL::CAtlDllModuleT<AESCryptModule>
 {
     public:
-        BOOL DllMain(DWORD dwReason, LPVOID lpReserved) noexcept
-        {
-            if (dwReason == DLL_PROCESS_ATTACH)
-            {
-                // Determine the application title
-                wchar_t buffer[256] = {};
-                LoadString(ATL::_pModule->GetModuleInstance(),
-                           IDS_APP_TITLE,
-                           buffer,
-                           _countof(buffer));
-
-                // Set the application title
-                GetAESCryptInterface().SetApplicationTitle(buffer);
-
-                // Determine the AES Crypt DLL path
-                std::wstring dll_path =
-                    GetModulePath(ATL::_pModule->GetModuleInstance());
-                dll_path =
-                    std::filesystem::path(dll_path).parent_path().wstring();
-                GetAESCryptInterface().SetModulePath(dll_path +
-                                                     L"\\aescrypt.dll");
-            }
-
-            return __super::DllMain(dwReason, lpReserved);
-        }
-
         DECLARE_LIBID(LIBID_AESCryptShellExtensionLib)
         DECLARE_REGISTRY_APPID_RESOURCEID(
                                     IDR_AESCRYPT_SHELL_EXTENSION,
@@ -126,9 +99,6 @@ extern "C" BOOL WINAPI DllMain([[maybe_unused]] HINSTANCE hInstance,
 __control_entrypoint(DllExport)
 STDAPI DllCanUnloadNow()
 {
-    // Ensure worker threads are not running
-    if (GetAESCryptInterface().AESLibraryBusy()) return S_FALSE;
-
     return AES_Crypt_Module.DllCanUnloadNow();
 }
 
@@ -149,10 +119,9 @@ STDAPI DllRegisterServer()
 
     if (result!= ERROR_SUCCESS) return E_ACCESSDENIED;
 
-    // Register the content menu so that File Explorer will make the menu
-    // available when right-clicking on a file
+    // Register the context menu as an approved shell extension
     result = reg.SetStringValue(L"{35872D53-3BD4-45FA-8DB5-FFC47D4235E7}",
-                                L"aescrypt_context_menu");
+                                L"AES Crypt Context Menu");
 
     if (result != ERROR_SUCCESS) return HRESULT_FROM_WIN32(result);
 

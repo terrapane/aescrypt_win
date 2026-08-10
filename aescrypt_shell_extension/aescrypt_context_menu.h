@@ -32,6 +32,9 @@
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
 
+// Facilitate locating AES Crypt launcher location
+extern "C" IMAGE_DOS_HEADER __ImageBase;
+
 // AESCryptContextMenu class declaration
 class ATL_NO_VTABLE AESCryptContextMenu :
         public ATL::CComObjectRootEx<ATL::CComSingleThreadModel>,
@@ -50,7 +53,8 @@ class ATL_NO_VTABLE AESCryptContextMenu :
 #ifdef _M_X64
         STDMETHOD(GetCommandString)(UINT_PTR, UINT, UINT *, LPSTR, UINT);
 #else
-        STDMETHOD(GetCommandString)(UINT, UINT, UINT*, LPSTR, UINT);
+        STDMETHOD(
+            GetCommandString)(UINT, UINT, UINT *, LPSTR, UINT);
 #endif
         STDMETHOD(InvokeCommand)(LPCMINVOKECOMMANDINFO);
         STDMETHOD(QueryContextMenu)(HMENU, UINT, UINT, UINT, UINT);
@@ -70,7 +74,10 @@ class ATL_NO_VTABLE AESCryptContextMenu :
         void FinalRelease() {}
 
     protected:
+        HRESULT ProcessFiles();
+
         HBITMAP context_bitmap;
+        std::wstring application_name;
         bool aes_files;
         bool non_aes_files;
         FileList file_list;
