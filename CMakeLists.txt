@@ -8,7 +8,7 @@ endif()
 
 # Define the dependencies project
 project(aescrypt_win
-        VERSION 4.6.0.0
+        VERSION 4.7.0.0
         DESCRIPTION  "AES Crypt for Windows Dependencies"
         HOMEPAGE_URL "https://www.aescrypt.com"
         LANGUAGES CXX)
@@ -25,6 +25,9 @@ configure_file(version.rc.in version.rc @ONLY)
 # from Microsoft.  The following side-steps this problem. See:
 # https://developercommunity.visualstudio.com/t/Access-violation-in-_Thrd_yield-after-up/10664660#T-N10668856
 add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
+
+# Set the AESCRYPT_WIN_GUI definition
+add_compile_definitions(AESCRYPT_WIN_GUI)
 
 # Include dependencies
 add_subdirectory("dependencies")
