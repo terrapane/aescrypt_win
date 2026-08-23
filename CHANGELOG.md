@@ -1,5 +1,23 @@
 # Change Log
 
+v4.7.0
+
+- Added AES Crypt to the start menu when installed
+- AES Crypt Launcher now opens a file selection window to align with
+  other platforms
+- Substantial change to the shell extension to make it as minimal in
+  size as possible, relying on AES Crypt Lancher to handle the file
+  list to encrypt or decrypt files
+- Some code restructuring
+
+v4.6.0
+
+- Increased KDF iterations to 600,000
+- Removed some stale dependencies
+- Minor ATL usage changes
+- Project file changes
+- Various minor code improvement
+
 v4.5.0
 
 - Updated dependencies

@@ -29,5 +29,8 @@ add_compile_definitions(_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR)
 # Set the AESCRYPT_WIN_GUI definition
 add_compile_definitions(AESCRYPT_WIN_GUI)
 
+# Enable tests that are defined in dependencies
+include(CTest)
+
 # Include dependencies
 add_subdirectory("dependencies")
