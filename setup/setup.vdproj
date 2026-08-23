@@ -22,13 +22,13 @@
         "Entry"
         {
         "MsmKey" = "8:_11DC18E64D84AD78D2717FB9C12DA946"
-        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_11DC18E64D84AD78D2717FB9C12DA946"
-        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -76,13 +76,13 @@
         "Entry"
         {
         "MsmKey" = "8:_5390EC93BB236B994147BA95C735CB80"
-        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_5390EC93BB236B994147BA95C735CB80"
-        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -100,13 +100,13 @@
         "Entry"
         {
         "MsmKey" = "8:_891D3146149739ACC88DB0124A961AAC"
-        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_891D3146149739ACC88DB0124A961AAC"
-        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -136,13 +136,13 @@
         "Entry"
         {
         "MsmKey" = "8:_C02056D8308F3522707030A44E852F86"
-        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_C02056D8308F3522707030A44E852F86"
-        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -202,13 +202,13 @@
         "Entry"
         {
         "MsmKey" = "8:_EEA7F2BF55E13E2AC3E6F17A6ED4FFE0"
-        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_EEA7F2BF55E13E2AC3E6F17A6ED4FFE0"
-        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -220,13 +220,13 @@
         "Entry"
         {
         "MsmKey" = "8:_F2B2C5DE677F72C27E08321DB0745C10"
-        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
+        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_F2B2C5DE677F72C27E08321DB0745C10"
-        "OwnerKey" = "8:_E165FFF6359C44C4A3DD9E1578B7B625"
+        "OwnerKey" = "8:_EA6D20D6E170451DAB017E1DCFFEE25E"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -734,15 +734,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:AES Crypt"
-        "ProductCode" = "8:{05A048EE-C883-46D2-907E-4485D51593B2}"
-        "PackageCode" = "8:{B2E91934-45F2-46C7-8BE6-5BD57FB3FFAB}"
+        "ProductCode" = "8:{CBE1864C-90E5-43D7-8BD2-8D18CAAC45CE}"
+        "PackageCode" = "8:{26261639-C9B0-4B5F-B24D-131E77240EF6}"
         "UpgradeCode" = "8:{92D16E60-1F16-4183-A78C-086C07CF436A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:4.6.0"
+        "ProductVersion" = "8:4.7.0"
         "Manufacturer" = "8:Terrapane Corporation"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:https://www.aescrypt.com/contact/"
