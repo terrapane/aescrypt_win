@@ -31,6 +31,9 @@
  *      will be formatted for user consumption.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
  *      window_title [in]
  *          The text of the title in the message box.
  *
@@ -46,7 +49,8 @@
  *  Comments:
  *      None.
  */
-void ReportError(const std::wstring &window_title,
+void ReportError(const HWND hwnd,
+                 const std::wstring &window_title,
                  const std::string &message,
                  DWORD reason = ERROR_SUCCESS);
 
@@ -61,6 +65,9 @@ void ReportError(const std::wstring &window_title,
  *      will be formatted for user consumption.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
  *      window_title [in]
  *          The text of the title in the message box.
  *
@@ -79,7 +86,8 @@ void ReportError(const std::wstring &window_title,
  *  Comments:
  *      None.
  */
-void ReportError(const std::wstring &window_title,
+void ReportError(const HWND hwnd,
+                 const std::wstring &window_title,
                  const std::wstring &message,
                  const std::string &error_string,
                  DWORD reason = ERROR_SUCCESS);
@@ -95,6 +103,9 @@ void ReportError(const std::wstring &window_title,
  *      will be formatted for user consumption.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
  *      window_title [in]
  *          The text of the title in the message box.
  *
@@ -110,6 +121,7 @@ void ReportError(const std::wstring &window_title,
  *  Comments:
  *      None.
  */
-void ReportError(const std::wstring &window_title,
+void ReportError(const HWND hwnd,
+                 const std::wstring &window_title,
                  const std::wstring &message,
                  DWORD reason = ERROR_SUCCESS);

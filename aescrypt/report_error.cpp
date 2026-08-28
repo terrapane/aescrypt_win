@@ -35,6 +35,9 @@
  *      will be formatted for user consumption.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
  *      window_title [in]
  *          The text of the title in the message box.
  *
@@ -50,7 +53,8 @@
  *  Comments:
  *      None.
  */
-void ReportError(const std::wstring &window_title,
+void ReportError(const HWND hwnd,
+                 const std::wstring &window_title,
                  const std::string &message,
                  DWORD reason)
 {
@@ -78,7 +82,7 @@ void ReportError(const std::wstring &window_title,
         unicode_message = L"Error occurred, as did a UTF-8 conversion error";
     }
 
-    ReportError(window_title, unicode_message, reason);
+    ReportError(hwnd, window_title, unicode_message, reason);
 }
 
 /*
@@ -92,6 +96,9 @@ void ReportError(const std::wstring &window_title,
  *      will be formatted for user consumption.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
  *      window_title [in]
  *          The text of the title in the message box.
  *
@@ -110,7 +117,8 @@ void ReportError(const std::wstring &window_title,
  *  Comments:
  *      None.
  */
-void ReportError(const std::wstring &window_title,
+void ReportError(const HWND hwnd,
+                 const std::wstring &window_title,
                  const std::wstring &message,
                  const std::string &error_string,
                  DWORD reason)
@@ -141,7 +149,7 @@ void ReportError(const std::wstring &window_title,
 
     std::wstring error_text = message + L": " + unicode_error;
 
-    ReportError(window_title, error_text, reason);
+    ReportError(hwnd, window_title, error_text, reason);
 }
 
 /*
@@ -155,6 +163,9 @@ void ReportError(const std::wstring &window_title,
  *      will be formatted for user consumption.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
  *      window_title [in]
  *          The text of the title in the message box.
  *
@@ -170,7 +181,8 @@ void ReportError(const std::wstring &window_title,
  *  Comments:
  *      None.
  */
-void ReportError(const std::wstring &window_title,
+void ReportError(const HWND hwnd,
+                 const std::wstring &window_title,
                  const std::wstring &message,
                  DWORD reason)
 {
@@ -205,7 +217,7 @@ void ReportError(const std::wstring &window_title,
         }
     }
 
-    ::MessageBox(NULL,
+    ::MessageBox(hwnd,
                  reported_message.c_str(),
                  window_title.c_str(),
                  MB_OK | MB_ICONERROR);

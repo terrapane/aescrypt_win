@@ -351,7 +351,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     else if (mode == AESCryptMode::Undefined)
     {
         // If there was a mixture of file types, report the error
-        ::MessageBox(NULL,
+        ::MessageBox(hwnd,
                      L"Please select either .aes or non-.aes files, but not "
                      L"both at the same time",
                      application_name.c_str(),

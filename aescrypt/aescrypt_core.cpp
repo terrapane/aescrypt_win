@@ -95,13 +95,15 @@ DWORD WINAPI ThreadEntry(LPVOID lpParameter)
     }
     catch (const std::exception &e)
     {
-        ::ReportError(Application_Name + L" Error",
+        ::ReportError(NULL,
+                      Application_Name + L" Error",
                       L"Unhandled exception from worker thread: ",
                       e.what());
     }
     catch (...)
     {
-        ::ReportError(Application_Name + L" Error",
+        ::ReportError(NULL,
+                      Application_Name + L" Error",
                       L"Unhandled exception from worker thread");
     }
 
@@ -254,8 +256,9 @@ void AESCryptCore::ProcessFiles(const HWND hwnd,
     // Proceed only if mode is Encrypt or Decrypt
     if ((mode != AESCryptMode::Encrypt) && (mode != AESCryptMode::Decrypt))
     {
-        ::ReportError(application_error,
-                        L"AES Crypt operating mode is not properly specified");
+        ::ReportError(hwnd,
+                      application_error,
+                      L"AES Crypt operating mode is not properly specified");
         return;
     }
 
@@ -264,7 +267,7 @@ void AESCryptCore::ProcessFiles(const HWND hwnd,
     // Verify user license rights
     if (!AESCRYPT_LICENSE_VALID)
     {
-        if (MessageBox(NULL,
+        if (MessageBox(hwnd,
                        L"A valid license is required to use AES Crypt. You "
                        L"may obtain a license by visiting "
                        L"https://www.aescrypt.com/. Visit now?",
@@ -294,7 +297,8 @@ void AESCryptCore::ProcessFiles(const HWND hwnd,
         // Ensure the password converted properly
         if (password.empty())
         {
-            ::ReportError(application_error,
+            ::ReportError(hwnd,
+                          application_error,
                           L"Password could not be converted to UTF-8");
             return;
         }
@@ -413,7 +417,7 @@ void AESCryptCore::StartThread(const HWND hwnd,
 
     // Unlock the mutex so the module is not blocked reporting an error
     lock.unlock();
-    ::ReportError(application_error, L"Thread creation failed");
+    ::ReportError(hwnd, application_error, L"Thread creation failed");
 }
 
 /*
@@ -458,7 +462,7 @@ void AESCryptCore::ThreadEntry()
         // Unlock the mutex to not block the module while reporting an error
         lock.unlock();
 
-        ::ReportError(application_error, L"Thread rendezvous failed");
+        ::ReportError(NULL, application_error, L"Thread rendezvous failed");
 
         // Re-lock the mutex and reduce the thread count
         lock.lock();
@@ -495,13 +499,15 @@ void AESCryptCore::ThreadEntry()
     }
     catch (const std::exception &e)
     {
-        ::ReportError(application_error,
+        ::ReportError(request.hwnd,
+                      application_error,
                       L"Unhandled exception processing file(s): ",
                       e.what());
     }
     catch (...)
     {
-        ::ReportError(application_error,
+        ::ReportError(request.hwnd,
+                      application_error,
                       L"Unhandled exception processing file(s)");
     }
 
@@ -580,7 +586,8 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
     // If the event handle is zero, that's a problem
     if (!event_handle)
     {
-        ::ReportError(application_error,
+        ::ReportError(hwnd,
+                      application_error,
                       L"Windows failed to create an event handle",
                       GetLastError());
         return;
@@ -607,13 +614,15 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
             }
             catch (const std::exception &e)
             {
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               L"Unexpected error in progress dialog thread",
                               e.what());
             }
             catch (...)
             {
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               L"Unexpected error in progress dialog thread");
             }
         });
@@ -666,7 +675,7 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
             // Report an error opening the file
             const std::wstring message =
                 L"Unable to open the input file " + in_file;
-            ::ReportError(application_error, message, error_code);
+            ::ReportError(hwnd, application_error, message, error_code);
 
             break;
         }
@@ -692,7 +701,8 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
             if (std::filesystem::is_regular_file(file_status))
             {
                 // Report an error opening the file
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               std::wstring(L"Output file already exists: ") +
                                   out_file);
                 break;
@@ -700,7 +710,8 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
         }
         catch (const std::exception &e)
         {
-            ::ReportError(application_error,
+            ::ReportError(hwnd,
+                          application_error,
                           std::wstring(L"Unexpected error processing ") +
                               in_file,
                           e.what());
@@ -709,7 +720,8 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
         catch (...)
         {
             // Report an error opening the file
-            ::ReportError(application_error,
+            ::ReportError(hwnd,
+                          application_error,
                           std::wstring(L"Unexpected error processing ") +
                               in_file);
             break;
@@ -733,7 +745,7 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
             // Report an error opening the file
             const std::wstring message =
                 L"Unable to open the output file " + out_file;
-            ::ReportError(application_error, message, error_code);
+            ::ReportError(hwnd, application_error, message, error_code);
 
             break;
         }
@@ -786,7 +798,8 @@ void AESCryptCore::EncryptFiles(const HWND hwnd,
             if (!error_text.empty())
             {
                 // Report the error to the user
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               std::string("Failed to encrypt: ") + error_text);
             }
 
@@ -1032,7 +1045,8 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
     {
         if (!HasAESExtension(in_file))
         {
-            ::ReportError(application_error,
+            ::ReportError(hwnd,
+                          application_error,
                           L"File to decrypt does not end in .aes: " + in_file);
             return;
         }
@@ -1056,7 +1070,8 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
     // If the event handle is zero, that's a problem
     if (!event_handle)
     {
-        ::ReportError(application_error,
+        ::ReportError(hwnd,
+                      application_error,
                       L"Windows failed to create an event handle",
                       GetLastError());
         return;
@@ -1083,13 +1098,15 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
             }
             catch (const std::exception &e)
             {
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               L"Unexpected error in progress dialog thread",
                               e.what());
             }
             catch (...)
             {
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               L"Unexpected error in progress dialog thread");
             }
         });
@@ -1141,7 +1158,7 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
 
             // Report an error opening the file
             std::wstring message = L"Unable to open the input file " + in_file;
-            ::ReportError(application_error, message, error_code);
+            ::ReportError(hwnd, application_error, message, error_code);
 
             break;
         }
@@ -1168,7 +1185,8 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
             if (std::filesystem::is_regular_file(file_status))
             {
                 // Report an error opening the file
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               std::wstring(L"Output file already exists: ") +
                                   out_file);
 
@@ -1178,7 +1196,8 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
         catch (const std::exception &e)
         {
             // Report an error opening the file
-            ::ReportError(application_error,
+            ::ReportError(hwnd,
+                          application_error,
                           std::wstring(L"Unexpected error processing ") +
                               in_file,
                           e.what());
@@ -1187,7 +1206,8 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
         catch (...)
         {
             // Report an error opening the file
-            ::ReportError(application_error,
+            ::ReportError(hwnd,
+                          application_error,
                           std::wstring(L"Unexpected error processing ") +
                               in_file);
             break;
@@ -1212,7 +1232,7 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
             // Report an error opening the file
             std::wstring message =
                 L"Unable to open the output file " + out_file;
-            ::ReportError(application_error, message, error_code);
+            ::ReportError(hwnd, application_error, message, error_code);
 
             break;
         }
@@ -1264,7 +1284,8 @@ void AESCryptCore::DecryptFiles(const HWND hwnd,
             if (!error_text.empty())
             {
                 // Report the error to the user
-                ::ReportError(application_error,
+                ::ReportError(hwnd,
+                              application_error,
                               std::string("Failed to decrypt: ") + error_text);
             }
 
