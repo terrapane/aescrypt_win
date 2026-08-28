@@ -283,11 +283,18 @@ LRESULT ProgressDialog::OnClickedCancel([[maybe_unused]] WORD wNotifyCode,
     // Indicate that processing was cancelled
     cancel_pressed.store(true);
 
+    // Hide the window once it is cancelled (if configured to do so)
+    if (hide_on_cancel)
+    {
+        // Hide the window more expendiently than via ShowWindow(SW_HIDE)
+        SetWindowPos(NULL,
+                     0, 0, 0, 0,
+                     SWP_HIDEWINDOW | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+                         SWP_NOACTIVATE);
+    }
+
     // Issue the notification callback if defined
     if (notify_cancel) notify_cancel();
-
-    // Hide the window once it is cancelled (if configured to do so)
-    if (hide_on_cancel) ShowWindow(SW_HIDE);
 
     // Allow default processing
     bHandled = TRUE;

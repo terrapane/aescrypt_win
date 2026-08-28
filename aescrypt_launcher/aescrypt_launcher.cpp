@@ -53,9 +53,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
+        // Hide the app window if the user cancelled the progress dialog
+        case TERRA_WM_PROCESSING_CANCELLED:
+            ShowWindow(hwnd, SW_HIDE);
+            return 0;
+
         case WM_PAINT:
         case WM_CREATE:
             return 0;
+
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
@@ -280,25 +286,30 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         RegisterClass(&wndclass);
     }
 
-    // Create the main application window for event control
-    HWND hwnd = CreateWindow(application_name.c_str(),
-                             application_name.c_str(),
-                             WS_OVERLAPPED,
-                             CW_USEDEFAULT,
-                             CW_USEDEFAULT,
-                             CW_USEDEFAULT,
-                             CW_USEDEFAULT,
-                             NULL,
-                             NULL,
-                             hInstance,
-                             NULL);
+    // Get the screen dimensions
+    int screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int screen_height = GetSystemMetrics(SM_CYSCREEN);
 
-    ShowWindow(hwnd, SW_HIDE);
-    UpdateWindow(hwnd);
+    // Create the main application window for event control
+    HWND hwnd = CreateWindowEx(WS_EX_APPWINDOW,
+                               application_name.c_str(),
+                               application_name.c_str(),
+                               WS_POPUP | WS_MINIMIZEBOX,
+                               screen_width / 2,
+                               screen_height / 2,
+                               0,
+                               0,
+                               NULL,
+                               NULL,
+                               hInstance,
+                               NULL);
 
     // If no filenames given on the command-line, then open File Explorer
     if (nArgs <= 1)
     {
+        // Show the window, but do not take focus (places app icon on taskbar)
+        ShowWindow(hwnd, SW_SHOWNA);
+
         // Allow the user to select files to encrypt or decrypt
         file_list = SelectFiles(hwnd,
                                 application_name,
@@ -323,9 +334,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
                 file_list.emplace_back(szArglist[i]);
             }
         }
+
+        // Show the window, but do not take focus (places app icon on taskbar)
+        ShowWindow(hwnd, SW_SHOWNA);
     }
 
-    // If the mode parameter was not given, use the file extension
+    // Determine the operating mode based on the file extensions seen
     AESCryptMode mode = DetermineMode(file_list);
 
     // Handle the file list (or lack of a list)
@@ -349,7 +363,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     else
     {
         // Initiate file processing
-        ProcessFiles(file_list, mode);
+        ProcessFiles(hwnd, 0, file_list, mode);
     }
 
     // Sit in a loop waiting for the AES Crypt Library to indicate it is no

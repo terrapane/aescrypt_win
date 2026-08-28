@@ -40,6 +40,7 @@
 #include <terra/aescrypt/engine/decryptor.h>
 #include <terra/aescrypt_lm/aescrypt_lm.h>
 #include <terra/bitutil/byte_order.h>
+#include "aescrypt.h"
 #include "aescrypt_core.h"
 #include "mode.h"
 #include "password_dialog.h"
@@ -226,6 +227,13 @@ bool AESCryptCore::IsBusy()
  *      decryption process.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
+ *      context [in]
+ *          A context value that will be passed to the parent window if messages
+ *          are sent (e.g., WM_PROCESSING_CANCELLED)
+ *
  *      file_list [in]
  *          The list of files to encrypt or decrypt.
  *
@@ -238,7 +246,10 @@ bool AESCryptCore::IsBusy()
  *  Comments:
  *      None.
  */
-void AESCryptCore::ProcessFiles(const FileList &file_list, AESCryptMode mode)
+void AESCryptCore::ProcessFiles(const HWND hwnd,
+                                std::uint32_t context,
+                                const FileList &file_list,
+                                AESCryptMode mode)
 {
     // Proceed only if mode is Encrypt or Decrypt
     if ((mode != AESCryptMode::Encrypt) && (mode != AESCryptMode::Decrypt))
@@ -272,7 +283,7 @@ void AESCryptCore::ProcessFiles(const FileList &file_list, AESCryptMode mode)
 
     // Prompt the user for a password
     if (password_dialog.DoModal(
-                            ::GetActiveWindow(),
+                            hwnd,
                             ((mode == AESCryptMode::Encrypt) ? 1 : 0)) == IDOK)
     {
         // Convert the password to UTF-8 as required by the AES Crypt Engine
@@ -288,7 +299,7 @@ void AESCryptCore::ProcessFiles(const FileList &file_list, AESCryptMode mode)
             return;
         }
 
-        StartThread(file_list, password, mode);
+        StartThread(hwnd, context, file_list, password, mode);
     }
 }
 
@@ -342,6 +353,13 @@ void AESCryptCore::CloseThreadHandles()
  *      a new thread to process the file list.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Parent window handle or NULL if there isn't one.
+ *
+ *      context [in]
+ *          A context value that will be passed to the parent window if messages
+ *          are sent (e.g., WM_PROCESSING_CANCELLED)
+ *
  *      file_list [in]
  *         The list of files to encrypt or decrypt.
  *
@@ -357,7 +375,9 @@ void AESCryptCore::CloseThreadHandles()
  *  Comments:
  *      None.
  */
-void AESCryptCore::StartThread(const FileList &file_list,
+void AESCryptCore::StartThread(const HWND hwnd,
+                               std::uint32_t context,
+                               const FileList &file_list,
                                const SecureU8String &password,
                                AESCryptMode mode)
 {
@@ -377,7 +397,9 @@ void AESCryptCore::StartThread(const FileList &file_list,
         // Make a copy of the file list and password, as those will be invalid
         // upon return from this function and as another thread processes
         // this data in the background
-        requests.emplace_back(file_list,
+        requests.emplace_back(hwnd,
+                              context,
+                              file_list,
                               password,
                               mode,
                               thread_id,
@@ -458,11 +480,17 @@ void AESCryptCore::ThreadEntry()
         // Encrypt or decrypt files based on the request
         if (request.mode == AESCryptMode::Encrypt)
         {
-            EncryptFiles(request.file_list, request.password);
+            EncryptFiles(request.hwnd,
+                         request.context,
+                         request.file_list,
+                         request.password);
         }
         else
         {
-            DecryptFiles(request.file_list, request.password);
+            DecryptFiles(request.hwnd,
+                         request.context,
+                         request.file_list,
+                         request.password);
         }
     }
     catch (const std::exception &e)
@@ -491,6 +519,13 @@ void AESCryptCore::ThreadEntry()
  *      given the provided password.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there is no parent.
+ *
+ *      context [in]
+ *          A context value that will be passed to the parent window if messages
+ *          are sent (e.g., WM_PROCESSING_CANCELLED)
+ *
  *      file_list [in]
  *          The list of files to encrypt.
  *
@@ -503,7 +538,9 @@ void AESCryptCore::ThreadEntry()
  *  Comments:
  *      None.
  */
-void AESCryptCore::EncryptFiles(const FileList &file_list,
+void AESCryptCore::EncryptFiles(const HWND hwnd,
+                                std::uint32_t context,
+                                const FileList &file_list,
                                 const SecureU8String &password)
 {
     std::condition_variable cv;
@@ -520,6 +557,10 @@ void AESCryptCore::EncryptFiles(const FileList &file_list,
     ProgressDialog progress_dialog(
         [&]()
         {
+            PostMessage(hwnd,
+                        TERRA_WM_PROCESSING_CANCELLED,
+                        static_cast<WPARAM>(context),
+                        0);
             const std::lock_guard<std::mutex> lock(mutex);
             cv.notify_all();
         });
@@ -552,7 +593,7 @@ void AESCryptCore::EncryptFiles(const FileList &file_list,
             try
             {
                 // Non-zero LPARAM displays "Encrypting"
-                progress_dialog.Create(GetDesktopWindow(), LPARAM(1));
+                progress_dialog.Create(hwnd, LPARAM(1));
                 progress_dialog.ShowWindow(SW_SHOWNORMAL);
 
                 // Signal that the progress dialog is ready
@@ -952,6 +993,13 @@ std::pair<bool, std::string> AESCryptCore::EncryptStream(
  *      given the provided password.
  *
  *  Parameters:
+ *      hwnd [in]
+ *          Handle to the parent window or NULL if there isn't one.
+ *
+ *      context [in]
+ *          A context value that will be passed to the parent window if messages
+ *          are sent (e.g., WM_PROCESSING_CANCELLED)
+ *
  *      file_list [in]
  *          The list of files to decrypt.
  *
@@ -964,7 +1012,9 @@ std::pair<bool, std::string> AESCryptCore::EncryptStream(
  *  Comments:
  *      None.
  */
-void AESCryptCore::DecryptFiles(const FileList &file_list,
+void AESCryptCore::DecryptFiles(const HWND hwnd,
+                                std::uint32_t context,
+                                const FileList &file_list,
                                 const SecureU8String &password)
 {
     std::condition_variable cv;
@@ -992,6 +1042,10 @@ void AESCryptCore::DecryptFiles(const FileList &file_list,
     ProgressDialog progress_dialog(
         [&]()
         {
+            PostMessage(hwnd,
+                        TERRA_WM_PROCESSING_CANCELLED,
+                        static_cast<WPARAM>(context),
+                        0);
             const std::lock_guard<std::mutex> lock(mutex);
             cv.notify_all();
         });
@@ -1015,7 +1069,7 @@ void AESCryptCore::DecryptFiles(const FileList &file_list,
             try
             {
                 // Zero LPARAM displays "Decrypting"
-                progress_dialog.Create(GetDesktopWindow(), LPARAM(0));
+                progress_dialog.Create(hwnd, LPARAM(0));
                 progress_dialog.ShowWindow(SW_SHOWNORMAL);
 
                 // Signal that the progress dialog is ready

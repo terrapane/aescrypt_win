@@ -40,6 +40,8 @@ using ExtensionList = std::vector<std::pair<std::string, std::string>>;
 // Type used to hold data associated with an encryption or decryption request
 struct RequestData
 {
+    HWND hwnd;
+    std::uint32_t context;
     FileList file_list;
     SecureU8String password;
     AESCryptMode mode;
@@ -59,7 +61,10 @@ class AESCryptCore
         bool IsBusy();
 
         // Process files for encryption (true) or decryption (false)
-        void ProcessFiles(const FileList &file_list, AESCryptMode mode);
+        void ProcessFiles(const HWND hwnd,
+                          std::uint32_t context,
+                          const FileList &file_list,
+                          AESCryptMode mode);
 
         // This should only be called by threads spawned by this class
         void ThreadEntry();
@@ -67,14 +72,20 @@ class AESCryptCore
     protected:
         void CloseThreadHandles();
 
-        void StartThread(const FileList &file_list,
+        void StartThread(const HWND hwnd,
+                         std::uint32_t context,
+                         const FileList &file_list,
                          const SecureU8String &password,
                          AESCryptMode mode);
 
-        void EncryptFiles(const FileList &file_list,
+        void EncryptFiles(const HWND hwnd,
+                          std::uint32_t context,
+                          const FileList &file_list,
                           const SecureU8String &password);
 
-        void DecryptFiles(const FileList &file_list,
+        void DecryptFiles(const HWND hwnd,
+                          std::uint32_t context,
+                          const FileList &file_list,
                           const SecureU8String &password);
 
         std::pair<bool, std::string> EncryptStream(

@@ -21,6 +21,7 @@
 #include <Windows.h>
 #include <atlbase.h>
 #include <atlhost.h>
+#include <cstdint>
 #include "aescrypt_core.h"
 #include "mode.h"
 #include "file_list.h"
@@ -64,9 +65,12 @@ BOOL WINAPI DllMain([[maybe_unused]] HMODULE module_handle,
 
 // Exported function that allows aescrypt_launcher.exe use this library to
 // encrypt or decrypt a list of files
-void __cdecl ProcessFiles(FileList &file_list, AESCryptMode mode)
+void __cdecl ProcessFiles(const HWND hwnd,
+                          std::uint32_t context,
+                          const FileList &file_list,
+                          AESCryptMode mode)
 {
-    GetAESCryptCore().ProcessFiles(file_list, mode);
+    GetAESCryptCore().ProcessFiles(hwnd, context, file_list, mode);
 }
 
 // Exported function that allows the library user to determine if all of the
